@@ -40,9 +40,44 @@ class ClientThread(threading.Thread):
             data = self.clientd.recv(BUFFER_SIZE)
             msg = data.decode()
 
-            # need to parse request
-            print(msg)
+            """
+                Need to determine if data is valid request else close connection
+            """
+            self.process_request(msg)
             break
+
+    def process_request(self, message):
+        """
+        Function used to process the request
+        """
+        if (self.is_valid_request(message[0])):
+            protocol = message[0]
+            """
+                length is the # of bytes we need to read after length param
+            """
+            length = self.get_length(message[1:9])
+
+    def is_valid_request(self, protocol):
+        """
+        Function to validate request
+        """
+        if protocol == '1':
+            return True
+        else:
+            return False
+
+    def get_length(self, length):
+        """
+        Function to get the value of integer value of the length
+        """
+        val = int(length)
+
+        return val
+
+    def read_data(self):
+        """
+        Function used to read data based on length value
+        """
 
 def main():
     """
