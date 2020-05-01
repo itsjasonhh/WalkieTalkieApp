@@ -4,6 +4,7 @@
 """
 import argparse
 import socket, threading
+import json
 
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
@@ -67,15 +68,16 @@ class ClientThread(threading.Thread):
             """
             data = self.clientd.recv(BUFFER_SIZE)
             msg = data.decode()
-            self.process_file_header(data)
 
+            self.process_file_header(data)
+            self.clientd.close()
             break
 
     def send_response(self):
         """
         Function to handle sending a response to the client
         """
-        response_string = '200000002{}'
+        response_string = '200000002{}\n'
 
         self.clientd.send(bytes(response_string, 'UTF-8'))
 
@@ -105,9 +107,13 @@ class ClientThread(threading.Thread):
         """
         request_type = message[0]
         length = self.get_length(message[1:9])
-        json_data = message[9:9+length]
-        print(json_data)
 
+        # TODO: What if length is larger than our buffer? need to cover this case
+        json_string = message[9:9 + length]
+
+        # Create a json onject of File Header e.g., {"tag": "8troihjZ6pQoXcZPg\/OpcUCGE1zF+zIRLywfuMaC3+o="}
+        json_data = json.loads(json_string)
+        print(json_data['tag'])
 
     def is_valid_request(self, protocol):
         """
@@ -122,7 +128,7 @@ class ClientThread(threading.Thread):
         """
         Function used to determine if contents are valid
         """
-        if self.buffer == '{}':
+        if self.buffer == '{}\n':
             return True
         else:
             return False
