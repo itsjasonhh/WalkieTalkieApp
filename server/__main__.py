@@ -7,6 +7,7 @@ import socket, threading
 
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
+HEADER_SIZE = 9
 
 def handle_arguments():
     """
@@ -31,6 +32,9 @@ class ClientThread(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.clientd = clientsocket
+        self.protocol = None
+        self.length = None
+        self.buffer = None
 
     def run(self):
         """
@@ -53,11 +57,16 @@ class ClientThread(threading.Thread):
         Function used to process the request
         """
         if (self.is_valid_request(message[0])):
-            protocol = message[0]
+            self.protocol = message[0]
             """
                 length is the # of bytes we need to read after length param
             """
-            length = self.get_length(message[1:9])
+            self.length = self.get_length(message[1:9])
+
+            self.read_data(self.length, message)
+
+            print(self.buffer)
+            print(len(self.buffer))
 
     def is_valid_request(self, protocol):
         """
@@ -76,10 +85,11 @@ class ClientThread(threading.Thread):
 
         return val
 
-    def read_data(self):
+    def read_data(self, length, msg):
         """
         Function used to read data based on length value
         """
+        self.buffer = msg[HEADER_SIZE: HEADER_SIZE + length + 1]
 
 def main():
     """
