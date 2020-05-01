@@ -38,6 +38,8 @@ class ClientThread(threading.Thread):
         """
         while True:
             data = self.clientd.recv(BUFFER_SIZE)
+            bytes_recv = len(data)
+
             msg = data.decode()
 
             """
