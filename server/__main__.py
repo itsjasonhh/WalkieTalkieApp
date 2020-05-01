@@ -68,11 +68,30 @@ class ClientThread(threading.Thread):
             print(self.buffer)
             print(len(self.buffer))
 
+            """
+                Need to validate contents of the buffer
+            """
+            if (self.is_valid_contents()):
+                print('Valid contents in request')
+                # TODO: Need to send response
+            else:
+                print('Invalid contents in request')
+                # TODO: Need to close connection
+
     def is_valid_request(self, protocol):
         """
         Function to validate request
         """
         if protocol == '1':
+            return True
+        else:
+            return False
+
+    def is_valid_contents(self):
+        """
+        Function used to determine if contents are valid
+        """
+        if self.buffer == '{}':
             return True
         else:
             return False
