@@ -35,6 +35,7 @@ class ClientThread(threading.Thread):
         self.protocol = None
         self.length = None
         self.buffer = None
+        self.valid_request = False
 
     def run(self):
         """
@@ -43,14 +44,40 @@ class ClientThread(threading.Thread):
         while True:
             data = self.clientd.recv(BUFFER_SIZE)
             bytes_recv = len(data)
-
             msg = data.decode()
 
             """
                 Need to determine if data is valid request else close connection
             """
             self.process_request(msg)
+
+            """
+                Close connection.
+            """
+            if self.valid_request:
+                """
+                    Send Response
+                """
+                self.send_response()
+            else:
+                break
+
+            """
+                Need to wait for File Header and Data now
+            """
+            data = self.clientd.recv(BUFFER_SIZE)
+            msg = data.decode()
+            self.process_file_header(data)
+
             break
+
+    def send_response(self):
+        """
+        Function to handle sending a response to the client
+        """
+        response_string = '200000002{}'
+
+        self.clientd.send(bytes(response_string, 'UTF-8'))
 
     def process_request(self, message):
         """
@@ -65,18 +92,22 @@ class ClientThread(threading.Thread):
 
             self.read_data(self.length, message)
 
-            print(self.buffer)
-            print(len(self.buffer))
-
             """
                 Need to validate contents of the buffer
             """
             if (self.is_valid_contents()):
-                print('Valid contents in request')
-                # TODO: Need to send response
-            else:
-                print('Invalid contents in request')
-                # TODO: Need to close connection
+                self.valid_request = True
+
+    def process_file_header(self, message):
+        """
+        Function to prcess the File Header after we have
+        achieved a valid request and response from/to the client respectfully
+        """
+        request_type = message[0]
+        length = self.get_length(message[1:9])
+        json_data = message[9:9+length]
+        print(json_data)
+
 
     def is_valid_request(self, protocol):
         """
