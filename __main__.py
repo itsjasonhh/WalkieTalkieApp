@@ -5,6 +5,7 @@
 import argparse
 import socket, threading
 import json
+import lib.HashHeader
 
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
