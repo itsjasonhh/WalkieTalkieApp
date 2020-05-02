@@ -100,6 +100,7 @@ class ClientThread(threading.Thread):
             """
             if (self.is_valid_contents()):
                 self.valid_request = True
+                print('Request Sent From Talker: {}'.format(message))
 
     def process_file_header(self, message):
         """
@@ -114,7 +115,7 @@ class ClientThread(threading.Thread):
 
         # Create a json onject of File Header e.g., {"tag": "8troihjZ6pQoXcZPg\/OpcUCGE1zF+zIRLywfuMaC3+o="}
         json_data = json.loads(json_string)
-        print(json_data['tag'])
+        print('Received Tag: {}'.format(json_data['tag']))
 
     def is_valid_request(self, protocol):
         """
@@ -202,9 +203,10 @@ def main():
         while True:
             in_data = client.recv(BUFFER_SIZE)
             msg = in_data.decode()
-            print(msg)
+
             if msg == '200000002{}\n':
-                out_data = input()
+                print('Response Sent From Listener: {}'.format(msg))
+                out_data = input('Input File Header: ')
                 client.sendall(bytes(out_data, 'UTF-8'))
 
             break
