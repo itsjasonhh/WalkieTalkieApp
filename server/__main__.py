@@ -9,6 +9,7 @@ import json
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
 HEADER_SIZE = 9
+SERVER = "127.0.0.1"
 
 def handle_arguments():
     """
@@ -153,33 +154,60 @@ def main():
     """
     args  = handle_arguments()
 
-    """
-        Create an INET, STREAMing socket
-    """
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if (args.listener and args.talker):
+        print('You can either be a listener or talker, not both!')
+        exit(1)
 
-    """
-        Bind socket to a public host and port
-    """
-    serversocket.bind((socket.gethostname(), args.PORT))
+    if (not args.listener and not args.talker):
+        """
+        Default to being a 'listener' If user does not specify
+        """
+        args.listener = True
 
-    serversocket.listen(MAX_CONNECTIONS)
-
-    """
-        Main loop of web server
-    """
-    while True:
-        # accept connection
-        (clientsocket, address) = serversocket.accept()
+    if args.listener:
+        """
+            Create an INET, STREAMing socket
+        """
+        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         """
-            Now handle something with the clientsocket
+            Bind socket to a public host and port
         """
-        ct = ClientThread(address, clientsocket)
-        ct.run()
+        serversocket.bind((socket.gethostname(), args.PORT))
 
+        serversocket.listen(MAX_CONNECTIONS)
 
+        """
+            Main loop of web server
+        """
+        while True:
+            # accept connection
+            (clientsocket, address) = serversocket.accept()
 
+            """
+                Now handle something with the clientsocket
+            """
+            ct = ClientThread(address, clientsocket)
+            ct.run()
+
+    if (args.talker):
+        """
+            We are a client and we want to send a request
+        """
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((SERVER, args.PORT))
+        REQUEST = '100000002{}\n'
+        client.sendall(bytes(REQUEST, 'UTF-8'))
+
+        while True:
+            in_data = client.recv(BUFFER_SIZE)
+            msg = in_data.decode()
+            print(msg)
+            if msg == '200000002{}\n':
+                out_data = input()
+                client.sendall(bytes(out_data, 'UTF-8'))
+
+            break
 
 if __name__ == '__main__':
     main()
