@@ -146,31 +146,32 @@ def countermode(plaintext,key):
     while len(iv) < 128:
         iv = iv + '0'
     simon = SIMON(128,256,key)
+    iv = int(iv,2)
     ciphertext = ''
     plain = bin(plaintext)[2:]
 
     #returns as a string of hex digits
     if number_of_blocks == 1:
-        ek = bin(simon.encrypt(int(iv,2)))[2:]
+        ek = bin(simon.encrypt(iv))[2:]
         cipher = plaintext ^ int(ek[0:n],2)
         return hex(cipher)[2:]
 
     #returns as a string of hex digits
     elif number_of_blocks > 1 and remainder == 0:
         for i in range(number_of_blocks):
-            ek = simon.encrypt(int(iv,2))
+            ek = simon.encrypt(iv)
             cipher = ek ^ int(plain[128*i:128*(i+1)],2)
             ciphertext += hex(cipher)[2:]
-            iv = bin(int(iv,2) + 1)[2:]
+            iv += 1
         return ciphertext
     else:
         for i in range(number_of_blocks-1):
-            ek = simon.encrypt(int(iv,2))
+            ek = simon.encrypt(iv)
             cipher = ek ^ int(plain[128*i:128*(i+1)],2)
             ciphertext += hex(cipher)[2:]
-            iv = bin(int(iv,2) + 1)[2:]
+            iv += 1
 
-        last = bin(simon.encrypt(int(iv,2)))[2:]
+        last = bin(simon.encrypt(iv))[2:]
         cipher = int(plain[-remainder:],2) ^ int(last[:remainder],2)
         ciphertext += hex(cipher)[2:]
         return ciphertext
