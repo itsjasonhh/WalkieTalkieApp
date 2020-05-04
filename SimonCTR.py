@@ -175,4 +175,7 @@ def countermode(plaintext,key):
         cipher = int(plain[-remainder:],2) ^ int(last[:remainder],2)
         ciphertext += hex(cipher)[2:]
         return ciphertext
-print(countermode(0x74206e69345345345345206d6f63453564abc369,0x0))
+c = countermode(0x74206e69345345345345206d6f635453564abc369,0x0)
+print(c)
+print(len(hex(0x74206e69345345345345206d6f63453564abc369))-2)
+print(len(c))
