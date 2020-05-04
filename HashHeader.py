@@ -5,9 +5,10 @@ import base64
 #k1 = 0x000000...000 for 256 bits
 #k2 = 0x010000...000 for 256 bits
 
-#Assuming k2 is an int in hex, encrypted_message is a string of hex digits
+#Assuming k2 is an int, encrypted_message is a string of hex digits
 #Returns string encoded in base64
-def create_header(k2, encrypted_message):
+k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
+def create_header(k2,encrypted_message):
     b = hex(k2)[2:]
     b += encrypted_message
     bytestring = bytes.fromhex(b)
