@@ -133,20 +133,21 @@ class SIMPLESIMON:
 # print(len(bin(0x04))-2)
 # print(bin(0x04)[2:])
 #plaintext as a hex integer, key as a hex integer, nonce is automatically set to useconds from jan 1, 1970
-def countermode(plaintext,key):
+def countermode_encrypt(plaintext,key):
     n = len(bin(plaintext))-2
     number_of_blocks = n // 128
     remainder = n%128
     if remainder != 0:
         number_of_blocks += 1
     #creating the nonce (iv) and counter
-    iv = bin(int(time.time()*1000000))[2:]
-    while len(iv) < 64:
-        iv = '0' + iv
-    while len(iv) < 128:
-        iv = iv + '0'
+    # iv = bin(int(time.time()*1000000))[2:]
+    # while len(iv) < 64:
+    #     iv = '0' + iv
+    # while len(iv) < 128:
+    #     iv = iv + '0'
+    # iv = int(iv,2)
+    iv = 0b01
     simon = SIMON(128,256,key)
-    iv = int(iv,2)
     ciphertext = ''
     plain = bin(plaintext)[2:]
 
@@ -175,7 +176,11 @@ def countermode(plaintext,key):
         cipher = int(plain[-remainder:],2) ^ int(last[:remainder],2)
         ciphertext += hex(cipher)[2:]
         return ciphertext
-c = countermode(0x74206e69345345345345206d6f635453564abc369,0x0)
+c = countermode_encrypt(0x74206e69345345345345206d6f635453564abc369,0x0)
 print(c)
 print(len(hex(0x74206e69345345345345206d6f63453564abc369))-2)
 print(len(c))
+
+def countermode_decrypt(ciphertext, key):
+    
+    return
