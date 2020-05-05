@@ -170,6 +170,7 @@ class SIMON:
 #maybe start by splitting plaintext into 128 bit blocks (as strings) and put them in an array
 #then manually update iv in a for loop as you encrypt each entry in the array.
 
+#returns as string of binary digits
 def countermode_encrypt(message,nonce,key):
     m = bin(message)[2:]
     n = len(m)
@@ -196,33 +197,30 @@ def countermode_encrypt(message,nonce,key):
         #full block of plaintext (128 bits)
         if len(i) == 128:
             cipher = ek ^ int(i,2)
-            ciphertext += hex(cipher)[2:]
+            cipher = bin(cipher)[2:]
+            while len(cipher) < len(i):
+                cipher = '0' + cipher
+            ciphertext += cipher
         #partial block of plaintext (< 128 bits)
         else:
             cipher = int(i,2) ^ int(bin(ek)[2 : len(i)+2],2)
-            ciphertext += hex(cipher)[2:]
+            cipher = bin(cipher)[2:]
+            while len(cipher) < len(i):
+                cipher = '0' + cipher
+            ciphertext += cipher
 
         nonce += 1
-    print(number_of_blocks)
     return ciphertext
 
 nonce = 0x0
 key = 0x0
 message = 0x20320938402938402394
 
-a = countermode_encrypt(message,nonce,key)
-print(a)
-print(len(bin(int(a,16))[2:]))
-print(len(bin(message)[2:]))
-print(bin(int(a,16))[2:])
-print(bin(message)[2:])
 
 
 # with open("recording.m4a",'rb') as file:
 #     data = file.read()
 #     message = int(data.hex(),16)
 #     a = countermode_encrypt(message,nonce,key)
-#     print(hex(message)[2:])
-#     print(a)
+#     print(len(a))
 #     print(len(bin(message))-2)
-#     print(len(bin(int(a, 16))[2:]))
