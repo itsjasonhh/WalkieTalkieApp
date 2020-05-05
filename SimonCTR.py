@@ -73,109 +73,156 @@ class SIMON:
 # print(bin(0x04)[2:])
 
 #plaintext,nonce,key are all ints, returns a string of hex digits
-def countermode_encrypt(plaintext,nonce,key):
-    n = len(bin(plaintext))-2
-    number_of_blocks = n // 128
+# def countermode_encrypt(plaintext,nonce,key):
+#     n = len(bin(plaintext))-2
+#     number_of_blocks = n // 128
+#     remainder = n%128
+#     if remainder != 0:
+#         number_of_blocks += 1
+#     #creating the nonce (iv) and counter
+#     iv = bin(nonce)[2:]
+#     while len(iv) < 64:
+#         iv = '0' + iv
+#     while len(iv) < 128:
+#         iv = iv + '0'
+#     iv = int(iv,2)
+#
+#     simon = SIMON(128,256,key)
+#     ciphertext = ''
+#     plain = bin(plaintext)[2:]
+#
+#     #returns as a string of hex digits
+#     if number_of_blocks == 1:
+#         ek = bin(simon.encrypt(iv))[2:]
+#         cipher = plaintext ^ int(ek[0:n],2)
+#         return hex(cipher)[2:]
+#
+#     #returns as a string of hex digits
+#     elif number_of_blocks > 1 and remainder == 0:
+#         for i in range(number_of_blocks):
+#             ek = simon.encrypt(iv)
+#             cipher = ek ^ int(plain[128*i:128*(i+1)],2)
+#             ciphertext += hex(cipher)[2:]
+#             iv += 1
+#         return ciphertext
+#     else:
+#         for i in range(number_of_blocks-1):
+#             ek = simon.encrypt(iv)
+#             cipher = ek ^ int(plain[128*i:128*(i+1)],2)
+#             ciphertext += hex(cipher)[2:]
+#             iv += 1
+#
+#         last = bin(simon.encrypt(iv))[2:]
+#         cipher = int(plain[-remainder:],2) ^ int(last[:remainder],2)
+#         ciphertext += hex(cipher)[2:]
+#         return ciphertext
+#
+# #ciphertext, nonce, key are all integers
+# def countermode_decrypt(ciphertext, nonce, key):
+#     n = len(bin(ciphertext))-2
+#     number_of_blocks = n // 128
+#     remainder = n%128
+#     if remainder != 0:
+#         number_of_blocks += 1
+#     iv = bin(nonce)[2:]
+#     while len(iv) < 64:
+#         iv = '0' + iv
+#     while len(iv) < 128:
+#         iv = iv + '0'
+#     iv = int(iv,2)
+#
+#     simon = SIMON(128,256,key)
+#     plaintext = ''
+#     ciph = bin(ciphertext)[2:]
+#
+#     #returns as a string of hex digits
+#     if number_of_blocks == 1:
+#         dk = bin(simon.encrypt(iv))[2:]
+#         plain = ciphertext ^ int(dk[0:n],2)
+#         return hex(plain)[2:]
+#
+#     #returns as a string of hex digits
+#     elif number_of_blocks > 1 and remainder == 0:
+#         for i in range(number_of_blocks):
+#             dk = simon.encrypt(iv)
+#             plain = dk ^ int(ciph[128*i:128*(i+1)],2)
+#             plaintext += hex(plain)[2:]
+#             iv += 1
+#         return plaintext
+#     else:
+#         for i in range(number_of_blocks-1):
+#             dk = simon.encrypt(iv)
+#             plain = dk ^ int(ciph[128*i:128*(i+1)],2)
+#             plaintext += hex(plain)[2:]
+#             iv += 1
+#
+#         last = bin(simon.encrypt(iv))[2:]
+#         plain = int(ciph[-remainder:],2) ^ int(last[:remainder],2)
+#         plaintext += hex(plain)[2:]
+#         return plaintext
+
+
+
+
+# print(countermode_decrypt(0x25,nonce, key))
+
+#encrypt and decrypt are not undoing each other
+#maybe start by splitting plaintext into 128 bit blocks (as strings) and put them in an array
+#then manually update iv in a for loop as you encrypt each entry in the array.
+
+def countermode_encrypt(message,nonce,key):
+    m = bin(message)[2:]
+    n = len(m)
     remainder = n%128
+    number_of_blocks = n//128
+    #splitting message into 128-bit blocks
     if remainder != 0:
         number_of_blocks += 1
-    #creating the nonce (iv) and counter
-    iv = bin(nonce)[2:]
-    while len(iv) < 64:
-        iv = '0' + iv
-    while len(iv) < 128:
-        iv = iv + '0'
-    iv = int(iv,2)
+    list_of_blocks = []
+    if number_of_blocks == 1:
+        list_of_blocks.append(m)
+    if number_of_blocks > 1 and remainder == 0:
+        for i in range(number_of_blocks):
+            list_of_blocks.append(m[i*128 : (i+1)*128])
+    if number_of_blocks > 1 and remainder != 0:
+        for i in range(number_of_blocks-1):
+            list_of_blocks.append(m[i*128 : (i+1)*128])
+        list_of_blocks.append(m[-remainder:])
 
     simon = SIMON(128,256,key)
     ciphertext = ''
-    plain = bin(plaintext)[2:]
-
-    #returns as a string of hex digits
-    if number_of_blocks == 1:
-        ek = bin(simon.encrypt(iv))[2:]
-        cipher = plaintext ^ int(ek[0:n],2)
-        return hex(cipher)[2:]
-
-    #returns as a string of hex digits
-    elif number_of_blocks > 1 and remainder == 0:
-        for i in range(number_of_blocks):
-            ek = simon.encrypt(iv)
-            cipher = ek ^ int(plain[128*i:128*(i+1)],2)
+    for i in list_of_blocks:
+        ek = simon.encrypt(nonce)
+        #full block of plaintext (128 bits)
+        if len(i) == 128:
+            cipher = ek ^ int(i,2)
             ciphertext += hex(cipher)[2:]
-            iv += 1
-        return ciphertext
-    else:
-        for i in range(number_of_blocks-1):
-            ek = simon.encrypt(iv)
-            cipher = ek ^ int(plain[128*i:128*(i+1)],2)
+        #partial block of plaintext (< 128 bits)
+        else:
+            cipher = int(i,2) ^ int(bin(ek)[2 : len(i)+2],2)
             ciphertext += hex(cipher)[2:]
-            iv += 1
 
-        last = bin(simon.encrypt(iv))[2:]
-        cipher = int(plain[-remainder:],2) ^ int(last[:remainder],2)
-        ciphertext += hex(cipher)[2:]
-        return ciphertext
+        nonce += 1
+    print(number_of_blocks)
+    return ciphertext
 
-#ciphertext, nonce, key are all integers
-def countermode_decrypt(ciphertext, nonce, key):
-    n = len(bin(ciphertext))-2
-    number_of_blocks = n // 128
-    remainder = n%128
-    if remainder != 0:
-        number_of_blocks += 1
-    iv = bin(nonce)[2:]
-    while len(iv) < 64:
-        iv = '0' + iv
-    while len(iv) < 128:
-        iv = iv + '0'
-    iv = int(iv,2)
+nonce = 0x0
+key = 0x0
+message = 0x20320938402938402394
 
-    simon = SIMON(128,256,key)
-    plaintext = ''
-    ciph = bin(ciphertext)[2:]
+a = countermode_encrypt(message,nonce,key)
+print(a)
+print(len(bin(int(a,16))[2:]))
+print(len(bin(message)[2:]))
+print(bin(int(a,16))[2:])
+print(bin(message)[2:])
 
-    #returns as a string of hex digits
-    if number_of_blocks == 1:
-        dk = bin(simon.encrypt(iv))[2:]
-        plain = ciphertext ^ int(dk[0:n],2)
-        return hex(plain)[2:]
-
-    #returns as a string of hex digits
-    elif number_of_blocks > 1 and remainder == 0:
-        for i in range(number_of_blocks):
-            dk = simon.encrypt(iv)
-            plain = dk ^ int(ciph[128*i:128*(i+1)],2)
-            plaintext += hex(plain)[2:]
-            iv += 1
-        return plaintext
-    else:
-        for i in range(number_of_blocks-1):
-            dk = simon.encrypt(iv)
-            plain = dk ^ int(plain[128*i:128*(i+1)],2)
-            plaintext += hex(plain)[2:]
-            iv += 1
-
-        last = bin(simon.encrypt(iv))[2:]
-        plain = int(ciph[-remainder:],2) ^ int(last[:remainder],2)
-        plaintext += hex(plain)[2:]
-        return plaintext
 
 # with open("recording.m4a",'rb') as file:
 #     data = file.read()
 #     message = int(data.hex(),16)
-#     a = countermode_encrypt(message,0x0)
+#     a = countermode_encrypt(message,nonce,key)
 #     print(hex(message)[2:])
 #     print(a)
-#     print(len(hex(message))-2)
-#     print(len(a))
-
-nonce = 0xe2232
-key = 0x0
-message = 0x5546502
-ciphertext = 0x3f9b831
-
-print(countermode_encrypt(message,nonce,key))
-print(countermode_decrypt(ciphertext,nonce,key))
-print(countermode_decrypt(int(countermode_encrypt(message,nonce,key),16),nonce,key))
-
+#     print(len(bin(message))-2)
+#     print(len(bin(int(a, 16))[2:]))
