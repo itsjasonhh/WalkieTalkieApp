@@ -228,7 +228,6 @@ class SimonCipher(object):
             a ^= c
 
         ciphertext = (b << self.word_size) + a
-
         return ciphertext
 
     def decrypt(self, ciphertext):
@@ -249,7 +248,7 @@ class SimonCipher(object):
             a, b = self.decrypt_function(a, b)
 
         elif self.mode == 'CTR':
-            true_counter = self.iv + self.counter
+            true_counter = int(time.time()*1000000) + self.counter
             d = (true_counter >> self.word_size) & self.mod_mask
             c = true_counter & self.mod_mask
             d, c = self.encrypt_function(d, c)
@@ -371,7 +370,14 @@ class SimonCipher(object):
                 raise
         return self.iv
 
-encrypt_simon = SimonCipher(0x0,256,128,'CTR')
-decrypt_simon = SimonCipher(0x0,256,128,'CTR')
-print(encrypt_simon.encrypt(0x05))
-print(decrypt_simon.decrypt(273667375284173757969559178356596630576))
+# with open("recording.m4a",'rb') as file:
+#     data = file.read()
+#     message = int(data.hex(),16)
+#     print((message))
+#     test = SimonCipher(0x0,256,128,'CTR',int(time.time()*1000000)
+#     print(len(hex(test.encrypt(message)))-2)
+#encrypt message is 32???
+test = SimonCipher(0x0,256,128,'CTR',int(time.time()*1000000))
+a = test.encrypt(0x234022390203982309293423984729837429efa2398429389282934792837492837492387429874298472983472983749238479283472983472983472938749234792837eeeeeeee37fff29384729387492837492837498eabcd982379284379838742983749283742983749283742937)
+print(a)
+print(len(a))
