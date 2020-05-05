@@ -212,11 +212,52 @@ def countermode_encrypt(message,nonce,key):
         nonce += 1
     return ciphertext
 
+def countermode_decrypt(ciphertext,nonce,key):
+    c = bin(ciphertext)[2:]
+    n = len(c)
+    remainder = n%128
+    number_of_blocks = n//128
+    if remainder != 0:
+        number_of_blocks += 1
+    list_of_blocks = []
+    if number_of_blocks == 1:
+        list_of_blocks.append(c)
+    if number_of_blocks > 1 and remainder == 0:
+        for i in range(number_of_blocks):
+            list_of_blocks.append(c[i*128 : (i+1)*128])
+    if number_of_blocks > 1 and remainder != 0:
+        for i in range(number_of_blocks-1):
+            list_of_blocks.append(c[i*128 : (i+1)*128])
+        list_of_blocks.append(c[-remainder:])
+    simon = SIMON(128,256,key)
+    plaintext = ''
+    for i in list_of_blocks:
+        dk = simon.encrypt(nonce)
+        if len(i) == 128:
+            plain = dk ^ int(i,2)
+            plain = bin(plain)[2:]
+            while len(plain) < len(i):
+                plain = '0' + plain
+            plaintext += plain
+        else:
+            plain = int(i,2) ^ int(bin(dk)[2 : len(i)+2],2)
+            plain = bin(plain)[2:]
+            while len(plain) < len(i):
+                plain = '0' + plain
+            plaintext += plain
+        nonce += 1
+    return plaintext
+
+
 nonce = 0x0
 key = 0x0
-message = 0x20320938402938402394
+message = 2
 
-
+a = countermode_encrypt(message,nonce,key)
+b = countermode_decrypt(0b01,nonce,key)
+print(a)
+print(b)
+print(bin(message)[2:])
 
 # with open("recording.m4a",'rb') as file:
 #     data = file.read()
