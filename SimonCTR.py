@@ -248,19 +248,22 @@ def countermode_decrypt(ciphertext,nonce,key):
     return plaintext
 
 
-nonce = 0x0
-key = 0x0
-message = '101111011010101010'
-ciphertext = '011100000100100011'
+# nonce = 0x0
+# key = 0x0
+# message = '101111011010101010'
+# ciphertext = '011100000100100011'
+#
+# a = countermode_encrypt(message,nonce,key)
+# b = countermode_decrypt(ciphertext,nonce,key)
+# print(a)
+#
+# print(b)
 
-a = countermode_encrypt(message,nonce,key)
-b = countermode_decrypt(ciphertext,nonce,key)
-print(a)
-
-print(b)
-
-# with open("recording.m4a",'rb') as file:
-#     data = file.read()
-#     message = int(data.hex(),16)
-#     print(countermode_encrypt(message,0,0))
+with open("recording.m4a",'rb') as file:
+    data = file.read()
+    message = bin(int(data.hex(),16))[2:]
+    cipher = countermode_encrypt(message,0,0)
+    print(cipher)
+    plain = countermode_decrypt(cipher,0,0)
+    print(plain == message)
 
