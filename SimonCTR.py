@@ -263,7 +263,6 @@ with open("recording.m4a",'rb') as file:
     data = file.read()
     message = bin(int(data.hex(),16))[2:]
     cipher = countermode_encrypt(message,0,0)
-    print(cipher)
     plain = countermode_decrypt(cipher,0,0)
     print(plain == message)
 
