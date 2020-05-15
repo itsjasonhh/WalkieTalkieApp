@@ -12,7 +12,7 @@ import encryptlib.json_message
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
 HEADER_SIZE = 9
-SERVER = "127.0.0.1"
+SERVER = "192.168.1.251"
 
 def handle_arguments():
     """
