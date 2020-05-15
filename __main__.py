@@ -5,13 +5,14 @@
 import argparse
 import socket, threading
 import json
-import lib.HashHeader
-import lib.SimonCTR
+# import encryptlib.HashHeader
+# import encryptlib.SimonCTR
+import encryptlib.json_message
 
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
 HEADER_SIZE = 9
-SERVER = "127.0.0.1"
+SERVER = '127.0.0.1'
 
 def handle_arguments():
     """
@@ -176,7 +177,7 @@ def main():
         """
             Bind socket to a public host and port
         """
-        serversocket.bind((socket.gethostname(), args.PORT))
+        serversocket.bind(('', args.PORT))
 
         serversocket.listen(MAX_CONNECTIONS)
 
@@ -190,6 +191,7 @@ def main():
             """
                 Now handle something with the clientsocket
             """
+            print(address)
             ct = ClientThread(address, clientsocket)
             ct.run()
 
