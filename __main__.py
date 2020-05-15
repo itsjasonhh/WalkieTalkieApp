@@ -5,8 +5,9 @@
 import argparse
 import socket, threading
 import json
-import lib.HashHeader
-import lib.SimonCTR
+# import encryptlib.HashHeader
+# import encryptlib.SimonCTR
+import encryptlib.json_message
 
 MAX_CONNECTIONS = 5
 BUFFER_SIZE = 4096
