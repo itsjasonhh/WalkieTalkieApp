@@ -41,6 +41,27 @@ class Client(object):
         # form entire request
         self.request = '{0}{1}{2}'.format('1', length_str, self.json_request)
 
+    def is_valid_response(self, response):
+        """
+        Function used to validate response
+        """
+        resp_type = response[0]
+        resp_length = response[1:9]
+
+        if resp_type != '2':
+            return False
+
+        try:
+            length  = int(resp_length)
+        except ValueError:
+            # sent us data that is NOT just digits 0-9
+            return False
+
+        payload = response[9:length + 1]
+
+        return True
+
+
     def run(self):
         """
         Function used to run client connection to server
@@ -52,10 +73,14 @@ class Client(object):
             in_data = self.clientsocket.recv(BUFFER_SIZE)
             msg = in_data.decode()
 
-            if msg == '200000002{}\n':
-                print('Response Sent From Listener: {}'.format(msg))
-                out_data = input('Input File Header: ')
-                self.clientsocket.sendall(bytes(out_data, 'UTF-8'))
+            if self.is_valid_response(msg):
+                print('Valid')
+                # 1. get key info
+                # 2. If valid response we need to send audio
+            else:
+                # else close connection
+                print('Invalid')
+                self.clientsocket.close()
 
             break
 
