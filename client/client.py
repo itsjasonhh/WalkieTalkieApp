@@ -3,6 +3,7 @@
     Script to start a client connection to server. (Talker)
 """
 import socket
+from encryptlib.json_message import JsonMessage
 
 BUFFER_SIZE = 4096
 
@@ -14,6 +15,7 @@ class Client(object):
         self.server = server
         self.port = port
         self.clientsocket = None
+        self.request = None
 
     def init(self):
         """
@@ -25,12 +27,26 @@ class Client(object):
         # Connect to server
         self.clientsocket.connect((self.server, self.port))
 
+    def build_request(self):
+        """
+        Function used to build the initial request
+        """
+        self.json_request = JsonMessage()
+        self.json_request.set_json_payload()
+
+        # Determine length of JSON payload
+        length = len(self.json_request.__str__())
+        length_str = '{:08d}'.format(length)
+
+        # form entire request
+        self.request = '{0}{1}{2}'.format('1', length_str, self.json_request)
+
     def run(self):
         """
         Function used to run client connection to server
         """
-        REQUEST = '100000002{}\n'
-        self.clientsocket.sendall(bytes(REQUEST, 'UTF-8'))
+        self.build_request()
+        self.clientsocket.sendall(bytes(self.request, 'UTF-8'))
 
         while True:
             in_data = self.clientsocket.recv(BUFFER_SIZE)
