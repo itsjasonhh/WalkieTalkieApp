@@ -7,6 +7,31 @@ Software requirements, python version 3 or greater.
 python >= 3
 ```
 
+## Repo Structure
+```
+.
+├── Makefile
+├── README.md
+├── __init__.py
+├── __main__.py
+├── client
+│   ├── __init__.py
+│   └── client.py
+├── encryptlib
+│   ├── HashHeader.py
+│   ├── SimonCTR.py
+│   ├── __init__.py
+│   └── json_message.py
+├── requirements.txt
+└── server
+    ├── __init__.py
+    ├── client_thread.py
+    └── server.py
+
+3 directories, 14 files
+```
+
+
 # Run Software
 ## Run Server (Listener)
 In order to run the listener run the following command where 8080 is the PORT
