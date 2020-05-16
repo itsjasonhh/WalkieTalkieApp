@@ -3,10 +3,8 @@
     Script to handle server / client socket implementation for CSE 234 Project
 """
 import argparse
-import socket, threading
-import json
-from server import Server
-from client import Client
+from server.server import Server
+from client.client import Client
 # import encryptlib.HashHeader
 # import encryptlib.SimonCTR
 
