@@ -8,6 +8,7 @@ import sys
 import os
 
 from encryptlib.json_message import JsonMessage
+from encryptlib.print_helper import PrintHelper
 
 BUFFER_SIZE = 4096
 HEADER_SIZE = 9
@@ -19,10 +20,7 @@ class ClientThread(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.clientd = clientsocket
-        self.protocol = None
-        self.length = None
-        self.buffer = None
-        self.valid_request = False
+        self.pprint = PrintHelper()
 
 
     def run(self):
@@ -88,7 +86,7 @@ class ClientThread(threading.Thread):
             # invalid JSON object
             return False
 
-        print('\nRequest >>>\n----------\n{0}\n----------'.format(request))
+        self.pprint.received('\nRequest >>>\n----------\n{0}\n----------'.format(request))
         return True
 
     def build_response(self):
@@ -104,7 +102,7 @@ class ClientThread(threading.Thread):
 
         # form entire request
         self.response = '{0}{1}{2}'.format('2', length_str, self.json_response.__str__())
-        print('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
+        self.pprint.sent('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
 
     def process_request(self):
         """
