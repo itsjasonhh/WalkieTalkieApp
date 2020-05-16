@@ -24,6 +24,7 @@ class ClientThread(threading.Thread):
         self.buffer = None
         self.valid_request = False
 
+
     def run(self):
         """
         Function to handle client socket thread execution
@@ -34,19 +35,19 @@ class ClientThread(threading.Thread):
             msg = data.decode()
 
             """
-                Need to determine if data is valid request else close connection
-            """
-            self.process_request(msg)
-
-            """
                 Close connection.
             """
-            if self.valid_request:
-                """
-                    Send Response
-                """
-                self.send_response()
+            if self.is_valid_request(msg):
+                # 1. Process Response
+                self.process_request()
+
+                # 2. Build Response
+                self.build_response()
+
+                # 3. Send Response
+                self.clientd.send(bytes(self.response, 'UTF-8'))
             else:
+                self.clientd.close()
                 break
 
             """
@@ -55,81 +56,87 @@ class ClientThread(threading.Thread):
             data = self.clientd.recv(BUFFER_SIZE)
             msg = data.decode()
 
-            self.process_file_header(data)
-            self.clientd.close()
+            if self.is_valid_file_header(data):
+                print('Valid File Header')
+            else:
+                self.clientd.close()
+                break
             break
 
-    def send_response(self):
-        """
-        Function to handle sending a response to the client
-        """
-        response_string = '200000002{}\n'
-
-        self.clientd.send(bytes(response_string, 'UTF-8'))
-
-    def process_request(self, message):
-        """
-        Function used to process the request
-        """
-        if (self.is_valid_request(message[0])):
-            self.protocol = message[0]
-            """
-                length is the # of bytes we need to read after length param
-            """
-            self.length = self.get_length(message[1:9])
-
-            self.read_data(self.length, message)
-
-            """
-                Need to validate contents of the buffer
-            """
-            if (self.is_valid_contents()):
-                self.valid_request = True
-                print('Request Sent From Talker: {}'.format(message))
-
-    def process_file_header(self, message):
-        """
-        Function to prcess the File Header after we have
-        achieved a valid request and response from/to the client respectfully
-        """
-        request_type = message[0]
-        length = self.get_length(message[1:9])
-
-        # TODO: What if length is larger than our buffer? need to cover this case
-        json_string = message[9:9 + length]
-
-        # Create a json onject of File Header e.g., {"tag": "8troihjZ6pQoXcZPg\/OpcUCGE1zF+zIRLywfuMaC3+o="}
-        json_data = json.loads(json_string)
-        print('Received Tag: {}'.format(json_data['tag']))
-
-    def is_valid_request(self, protocol):
+    def is_valid_request(self, request):
         """
         Function to validate request
         """
-        if protocol == '1':
-            return True
-        else:
+        req_type = request[0]
+        req_length = request[1:9]
+
+        if req_type != '1':
             return False
 
-    def is_valid_contents(self):
-        """
-        Function used to determine if contents are valid
-        """
-        if self.buffer == '{}\n':
-            return True
-        else:
+        try:
+            length = int(req_length)
+        except ValueError:
+            # sent us data that is NOT just digits 0-9
             return False
 
-    def get_length(self, length):
-        """
-        Function to get the value of integer value of the length
-        """
-        val = int(length)
+        # Attempt to get json object
+        payload = request[9: length + 9]
 
-        return val
+        try:
+            self.json_request = json.loads(payload)
+        except json.JSONDecodeError:
+            # invalid JSON object
+            return False
 
-    def read_data(self, length, msg):
+        print('\nRequest >>>\n----------\n{0}\n----------'.format(request))
+        return True
+
+    def build_response(self):
         """
-        Function used to read data based on length value
+        Function to handle sending a response to the client
         """
-        self.buffer = msg[HEADER_SIZE: HEADER_SIZE + length + 1]
+        self.json_response = JsonMessage()
+        self.json_response.set_json_payload()
+
+        # Determine length of JSON payload
+        length = len(self.json_response.__str__())
+        length_str = '{:08d}'.format(length)
+
+        # form entire request
+        self.response = '{0}{1}{2}'.format('2', length_str, self.json_response.__str__())
+        print('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
+
+    def process_request(self):
+        """
+        Function used to process the request get contents from payload
+        """
+        pass
+
+    def is_valid_file_header(self, message):
+        """
+        Function to determine if File Header is valid
+        """
+        if len(message) < 9:
+            return False
+
+        header_type = message[0]
+        length_str = messagep[1:9]
+
+        if header_type != '3':
+            return False
+
+        try:
+            length = int(length_str)
+        except ValueError:
+            return False
+
+        # Attempt to get json object
+        payload = request[9: length + 9]
+
+        try:
+            self.json_header = json.loads(payload)
+        except json.JSONDecodeError:
+            # invalid JSON object
+            return False
+
+        return True
