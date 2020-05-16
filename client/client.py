@@ -35,6 +35,10 @@ class Client(object):
         Function used to build the initial request
         """
         self.json_request = JsonMessage()
+
+        """
+            TODO: Need to inject code to build a VALID Request
+        """
         self.json_request.set_json_payload()
 
         # Determine length of JSON payload

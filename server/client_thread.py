@@ -94,6 +94,10 @@ class ClientThread(threading.Thread):
         Function to handle sending a response to the client
         """
         self.json_response = JsonMessage()
+
+        """
+            TODO: Need to inject code to build a VALID Response
+        """
         self.json_response.set_json_payload()
 
         # Determine length of JSON payload
