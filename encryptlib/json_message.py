@@ -24,8 +24,8 @@ class JsonMessage(object):
                 "signature": 0
             },
             "sess_key": {
-                "key": None,
-                "nonce": None
+                "key": 0,
+                "nonce": 0
             }
        }
 
@@ -63,7 +63,7 @@ class JsonMessage(object):
         Function used to set sess key parameters
         """
         self.dhke_data["sess_key"]["key"] = 696969
-        self.dhke_data["sess_key"]["key"] = 696969
+        self.dhke_data["sess_key"]["nonce"] = 696969
 
     def __str__(self):
         """
