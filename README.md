@@ -39,6 +39,7 @@ we are listening on
 ```
 python __main__.py 8080 --listener
 ```
+The **encrypt-server/server** directory handles the setting up of the server (Listener)
 
 ## Run Client (Talker)
 In order to run the talker run the following command where 8080 is the PORT
@@ -47,6 +48,7 @@ the port we want to send data to the listener on
 ```
 python __main__.py 8080 --talker
 ```
+The **encrypt-server/client** directory handles the setting up of the client connection (Talker)
 
 ## Software Help
 Run the following command to get a help menu output of valid parameters
