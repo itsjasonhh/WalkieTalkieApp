@@ -3,6 +3,7 @@
 """
 import json
 import datetime
+import encryptlib.SimonCTR as ctr
 
 WHO_SENT = "ShelterInPlaceHackers"
 
@@ -24,10 +25,19 @@ class JsonMessage(object):
                 "signature": 0
             },
             "sess_key": {
-                "key": 0,
-                "nonce": 0
+                "key": 0, # 256 bits
+                "nonce": 0 # ToD
             }
        }
+
+        """
+        Alice -> Bob
+
+        dhke = {
+            "payload": "<encrypted_request_payload>",
+            "sess_key"" "<encrypted_with_bobs_pub_key>"
+        }
+        """
 
     def set_json_payload(self):
         """
@@ -42,6 +52,24 @@ class JsonMessage(object):
         epoch = datetime.datetime.now().timestamp() * 1000
         epoch = int(epoch)
         self.dhke_data["payload"]["TOD"] = epoch
+
+    def encrypt_payload(self):
+        """
+        Function to encrypt the message payload
+        """
+        payload_str = json.dumps(self.dhke_data["payload"])
+        payload_binary_str = ctr.string_to_binary(payload_str)
+        binary_str_encrypted = ctr.countermode_encrypt(payload_binary_str, 0, 0)
+        self.dhke_data["payload"] = ctr.binary_to_string(binary_str_encrypted)
+
+    def decrypt_payload(self):
+        """
+        Function to decrypt payload message
+        """
+        payload_str = json.dumps(self.dhke_data["payload"])
+        payload_binary_str = ctr.string_to_binary(payload_str)
+        binary_str_decrypted = ctr.countermode_decrypt(payload_binary_str, 0, 0)
+        self.dhke_data["payload"] = ctr.binary_to_string(binary_str_decrypted)
 
     def set_agreement_data(self):
         """
