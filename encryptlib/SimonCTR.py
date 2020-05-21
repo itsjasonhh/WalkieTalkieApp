@@ -140,22 +140,39 @@ def countermode_decrypt(ciphertext,nonce,key):
         nonce += 1
     return plaintext
 
-
-# nonce = 0x0
-# key = 0x0
-# message = '101111011010101010'
-# ciphertext = '011100000100100011'
-#
-# a = countermode_encrypt(message,nonce,key)
-# b = countermode_decrypt(ciphertext,nonce,key)
-# print(a)
-#
-# print(b)
-
 with open("recording.m4a",'rb') as file:
     data = file.read()
     message = bin(int(data.hex(),16))[2:]
     cipher = countermode_encrypt(message,0,0)
     plain = countermode_decrypt(cipher,0,0)
-    print(plain == message)
+
+
+def string_to_binary(a):
+    sol = ''
+    for i in a:
+        k = ord(i)
+        str = bin(k)[2:]
+        while len(str) < 8:
+            str = '0'+str
+        sol += str
+    return sol
+
+def binary_to_string(binarystring):
+    sol = ''
+    i = 0
+    while i < len(binarystring):
+        a = binarystring[i:i+8]
+        b = int(a,2)
+        c = chr(b)
+        sol += c
+        i += 8
+    return sol
+
+
+
+
+
+
+
+
 
