@@ -122,7 +122,7 @@ class ClientThread(threading.Thread):
             return False
 
         header_type = message[0]
-        length_str = messagep[1:9]
+        length_str = message[1:9]
 
         if header_type != '3':
             return False
@@ -133,7 +133,7 @@ class ClientThread(threading.Thread):
             return False
 
         # Attempt to get json object
-        payload = request[9: length + 9]
+        payload = message[9: length + 9]
 
         try:
             self.json_header = json.loads(payload)

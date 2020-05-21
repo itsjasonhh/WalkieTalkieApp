@@ -20,7 +20,7 @@ def create_header(k2,encrypted_message):
     return b64.decode()
 
 
-with open("recording.encrypted", 'rb') as file:
+with open("../recording.encrypted", 'rb') as file:
     data = file.read()
     print(data[:100])
     message = data.hex()
