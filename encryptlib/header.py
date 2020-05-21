@@ -16,7 +16,7 @@ def create_header(message, nonce):
     k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
     encrypted_message = countermode_encrypt(message, nonce, k1)
     b = hex(k2)[2:]
-    b += encrypted_message
+    b += hex(int(encrypted_message))[2:]
     if len(b) % 2 != 0:
         b = '0' + b
     bytestring = bytes.fromhex(b)
