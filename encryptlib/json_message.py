@@ -60,15 +60,14 @@ class JsonMessage(object):
         payload_str = json.dumps(self.dhke_data["payload"])
         payload_binary_str = ctr.string_to_binary(payload_str)
         binary_str_encrypted = ctr.countermode_encrypt(payload_binary_str, 0, 0)
-        self.dhke_data["payload"] = ctr.binary_to_string(binary_str_encrypted)
+        self.dhke_data["payload"] = binary_str_encrypted
 
     def decrypt_payload(self):
         """
         Function to decrypt payload message
         """
         payload_str = json.dumps(self.dhke_data["payload"])
-        payload_binary_str = ctr.string_to_binary(payload_str)
-        binary_str_decrypted = ctr.countermode_decrypt(payload_binary_str, 0, 0)
+        binary_str_decrypted = ctr.countermode_decrypt(self.dhke_data["payload"], 0, 0)
         self.dhke_data["payload"] = ctr.binary_to_string(binary_str_decrypted)
 
     def set_agreement_data(self):
