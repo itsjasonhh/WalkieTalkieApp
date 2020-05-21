@@ -4,7 +4,7 @@ Domain Parameters for 512-Bit Curves
 """
 import random
 
-
+# Elliptic curve Diffie-Hellman key exchange
 class ECDH:
     p = 0xAADD9DB8DBE9C48B3FD4E6AE33C9FC07CB308DB3B3C9D20ED6639CCA703308717D4D9B009BC66842AECDA12AE6A380E62881FF2F2D82C68528AA6056583A48F3
 
@@ -81,5 +81,5 @@ if __name__ == '__main__':
     A = Alice.pub_key()
     Bob = ECDH()
     B = Bob.pub_key()
-    print(Alice.agreed_key(B) == Bob.agreed_key(A))
+    print(Alice.agreed_key(B)[0] == Bob.agreed_key(A)[0])  # only use x
 
