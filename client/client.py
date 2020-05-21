@@ -5,6 +5,7 @@
 import socket
 import json
 from encryptlib.json_message import JsonMessage
+from encryptlib.print_helper import PrintHelper
 
 BUFFER_SIZE = 4096
 
@@ -17,6 +18,7 @@ class Client(object):
         self.port = port
         self.clientsocket = None
         self.request = None
+        self.pprint = PrintHelper()
 
     def init(self):
         """
@@ -33,6 +35,10 @@ class Client(object):
         Function used to build the initial request
         """
         self.json_request = JsonMessage()
+
+        """
+            TODO: Need to inject code to build a VALID Request
+        """
         self.json_request.set_json_payload()
 
         # Determine length of JSON payload
@@ -41,7 +47,7 @@ class Client(object):
 
         # form entire request
         self.request = '{0}{1}{2}'.format('1', length_str, self.json_request.__str__())
-        print('\nRequest <<<\n----------\n{0}\n----------'.format(self.request))
+        self.pprint.sent('\nRequest <<<\n----------\n{0}\n----------'.format(self.request))
 
     def is_valid_response(self, response):
         """
@@ -67,7 +73,7 @@ class Client(object):
             # invalid JSON object
             return False
 
-        print('\nResponse >>>n----------\n{0}\n----------'.format(response))
+        self.pprint.received('\nResponse >>>\n----------\n{0}\n----------'.format(response))
         return True
 
 

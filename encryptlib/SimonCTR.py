@@ -140,11 +140,11 @@ def countermode_decrypt(ciphertext,nonce,key):
         nonce += 1
     return plaintext
 
-with open("recording.m4a",'rb') as file:
-    data = file.read()
-    message = bin(int(data.hex(),16))[2:]
-    cipher = countermode_encrypt(message,0,0)
-    plain = countermode_decrypt(cipher,0,0)
+# with open("recording.m4a",'rb') as file:
+#     data = file.read()
+#     message = bin(int(data.hex(),16))[2:]
+#     cipher = countermode_encrypt(message,0,0)
+#     plain = countermode_decrypt(cipher,0,0)
 
 
 def string_to_binary(a):
