@@ -55,7 +55,7 @@ class Key_exchange:
     def __init__(self, p, alpha):
         self.p = p
         self.alpha = alpha
-        self.a = random.randrange(2, p)
+        self.a = random.randrange(2, p-2)
 
     def pub_key(self):
         return pow(self.alpha, self.a, self.p)
