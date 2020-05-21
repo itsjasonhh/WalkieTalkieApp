@@ -42,7 +42,7 @@ class DH():  # Diffie-Hellman set-up
                 return False
         return True
 
-    def generate_prime(self, length=512): # length of prime in bits
+    def generate_prime(self, length): # length of prime in bits
         p = 4
         while not self.is_prime(p):
             p = random.getrandbits(length)
