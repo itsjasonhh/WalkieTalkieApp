@@ -10,10 +10,10 @@ from encryptlib.SimonCTR import countermode_encrypt
 #Assuming k2 is an int, encrypted_message is a string of hex digits
 #Returns string encoded in base64
 
+k1 = 0x0000000000000000000000000000000000000000000000000000000000000000
+k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
 
 def create_header(message, nonce):
-    k1 = 0x0000000000000000000000000000000000000000000000000000000000000000
-    k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
     encrypted_message = countermode_encrypt(message, nonce, k1)
     b = hex(k2)[2:]
     b += hex(int(encrypted_message))[2:]
@@ -21,7 +21,7 @@ def create_header(message, nonce):
         b = '0' + b
     bytestring = bytes.fromhex(b)
     T = hashlib.sha3_256(bytestring).digest()
-    value = base64.b64encode(T)
+    value = base64.b64encode(T)  # byte format, needs to be decoded to str
     tag_value = {"tag": value.decode()}
     tag_value_str = json.dumps(tag_value)
     length = len(tag_value_str)
