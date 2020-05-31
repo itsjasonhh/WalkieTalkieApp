@@ -50,7 +50,7 @@ if __name__ == '__main__':
     B = Bob.pub_key()
     diffie = Alice.produce_key(B)
 
-    with open("../recording.m4a", 'rb') as file:
+    with open("recording.m4a", 'rb') as file:
         data = file.read()
         message = bin(int(data.hex(), 16))[2:]
         nonce = 0
