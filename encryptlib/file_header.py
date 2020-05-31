@@ -14,7 +14,7 @@ from encryptlib.dh import DH
 #k1 = 0x0000000000000000000000000000000000000000000000000000000000000000
 #k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
 
-def create_header(message, nonce, diffie):
+def create_header(data, nonce, diffie):
     "produce k1, k2"
     diffie_hex = hex(diffie)[2:]
     if len(diffie_hex) % 2 != 0:
@@ -27,9 +27,10 @@ def create_header(message, nonce, diffie):
     k1, k2 = int(k1, 2), int(k2, 2)
 
     "produce header"
-    encrypted_message = countermode_encrypt(message, nonce, k1)
+    message = bin(int(data.hex(), 16))[2:]
+    encrypted_message = countermode_encrypt(message, nonce, k1) # binary bit string
     b = hex(k2)[2:]
-    b += hex(int(encrypted_message))[2:]
+    b += hex(int(encrypted_message, 2))[2:]
     if len(b) % 2 != 0:
         b = '0' + b
     bytestring = bytes.fromhex(b)
@@ -52,6 +53,5 @@ if __name__ == '__main__':
 
     with open("recording.m4a", 'rb') as file:
         data = file.read()
-        message = bin(int(data.hex(), 16))[2:]
         nonce = 0
-        print(create_header(message, nonce, diffie))
+        print(create_header(data, nonce, diffie))
