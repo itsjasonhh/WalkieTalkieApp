@@ -2,6 +2,7 @@ import hashlib
 import base64
 import json
 from encryptlib.SimonCTR import countermode_encrypt
+from encryptlib.dh import DH
 #file is encrypted using simon in counter mode using k1
 #hash is calculated using k2
 #k1 = 0x000000...000 for 256 bits
@@ -10,10 +11,22 @@ from encryptlib.SimonCTR import countermode_encrypt
 #Assuming k2 is an int, encrypted_message is a string of hex digits
 #Returns string encoded in base64
 
-k1 = 0x0000000000000000000000000000000000000000000000000000000000000000
-k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
+#k1 = 0x0000000000000000000000000000000000000000000000000000000000000000
+#k2 = 0x0100000000000000000000000000000000000000000000000000000000000000
 
-def create_header(message, nonce):
+def create_header(message, nonce, diffie):
+    "produce k1, k2"
+    diffie_hex = hex(diffie)[2:]
+    if len(diffie_hex) % 2 != 0:
+        diffie_hex = '0' + diffie_hex
+    diffie_byte = bytes.fromhex(diffie_hex)
+    k1_k2 = hashlib.sha3_512(diffie_byte).hexdigest()
+    k1_k2_bin = bin(int(k1_k2, 16))[2:]
+    k1 = k1_k2_bin[:-256]
+    k2 = k1_k2_bin[-256:]
+    k1, k2 = int(k1, 2), int(k2, 2)
+
+    "produce header"
     encrypted_message = countermode_encrypt(message, nonce, k1)
     b = hex(k2)[2:]
     b += hex(int(encrypted_message))[2:]
@@ -31,8 +44,14 @@ def create_header(message, nonce):
 
 
 if __name__ == '__main__':
+    Alice = DH()
+    A = Alice.pub_key()
+    Bob = DH()
+    B = Bob.pub_key()
+    diffie = Alice.produce_key(B)
+
     with open("../recording.m4a", 'rb') as file:
         data = file.read()
         message = bin(int(data.hex(), 16))[2:]
         nonce = 0
-        print(create_header(message, nonce))
+        print(create_header(message, nonce, diffie))
