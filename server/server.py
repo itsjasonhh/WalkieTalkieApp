@@ -8,12 +8,14 @@ from server.client_thread import ClientThread
 MAX_CONNECTIONS = 5
 
 class Server(object):
-    def __init__(self, host, port):
+    def __init__(self, host, port, public_key, private_key):
         """
         Default constructor for the server implementation
         """
         self.host = host
         self.port = port
+        self.public_key = public_key
+        self.private_key = private_key
         self.serversocket = None
 
     def init(self):
@@ -36,5 +38,5 @@ class Server(object):
         while True:
             (clientsocket, address) = self.serversocket.accept()
 
-            ct = ClientThread(clientsocket, address)
+            ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
             ct.run()

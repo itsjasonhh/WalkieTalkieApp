@@ -3,10 +3,13 @@
     Script to handle server / client socket implementation for CSE 234 Project
 """
 import argparse
+from Crypto.PublicKey import RSA
 from server.server import Server
 from client.client import Client
 
 SERVER = '127.0.0.1'
+PUB_KEY_PATH = 'keylib/pubkey.pem'
+PRI_KEY_PATH = 'keylib/key.pem'
 
 def handle_arguments():
     """
@@ -30,6 +33,7 @@ def main():
     """
     args  = handle_arguments()
 
+
     if (args.listener and args.talker):
         print('You can either be a listener or talker, not both!')
         exit(1)
@@ -39,6 +43,18 @@ def main():
         Default to being a 'listener' If user does not specify
         """
         args.listener = True
+
+    """
+        Need to load RSA private and public keys
+    """
+    f = open(PRI_KEY_PATH, 'r')
+    key = RSA.import_key(f.read())
+    f.close()
+
+    f = open(PUB_KEY_PATH, 'r')
+    pubkey = RSA.import_key(f.read())
+    f.close()
+
 
     if args.listener:
         """
@@ -52,7 +68,7 @@ def main():
         """
             We are a client and we want to send a request
         """
-        client = Client(SERVER, args.PORT)
+        client = Client(SERVER, args.PORT, public_key, private_key)
         client.init()
         client.run()
 

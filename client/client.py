@@ -18,7 +18,7 @@ BUFFER_SIZE = 4096
 KEY_BIT_SIZE = 4000
 
 class Client(object):
-    def __init__(self, server, port):
+    def __init__(self, server, port, public_key, private_key):
         """
         Default constructor for the client implementation
         """
@@ -26,6 +26,8 @@ class Client(object):
         self.port = port
         self.clientsocket = None
         self.request = None
+        self.public_key = public_key
+        self.private_key = private_key
         self.pprint = PrintHelper()
 
         # TODO: needs to be dynamic this is representative of reveiver public key

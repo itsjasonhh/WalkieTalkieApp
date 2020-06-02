@@ -14,12 +14,14 @@ BUFFER_SIZE = 4096
 HEADER_SIZE = 9
 
 class ClientThread(threading.Thread):
-    def __init__(self,clientsocket, client_address):
+    def __init__(self,clientsocket, client_address, public_key, private_key):
         """
         Default constructor or class handling client socket thread
         """
         threading.Thread.__init__(self)
         self.clientd = clientsocket
+        self.public_key = public_key
+        self.private_key = private_key
         self.pprint = PrintHelper()
 
 
