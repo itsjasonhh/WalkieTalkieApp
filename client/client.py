@@ -59,23 +59,23 @@ class Client(object):
             nonce: nonce
         }
 
-        this.json_request["payload"]["sess_key"] = sess_key
+        self.json_request.dhke_data["payload"]["sess_key"] = sess_key
 
     def encrypt_sess_key(self):
         """
         Function used to encrypt the sess_key object by the receivers public key
         """
-        sess_key = copy.copy(self.json_request["payload"]["sess_key"])
+        sess_key = copy.copy(self.json_request.dhke_data["payload"]["sess_key"])
         sess_key = json.dumps(sess_key)
 
-        raw_bytes = bytes(sess_key, 'utf-8')
+        raw_bytes = bytes(sess_key, 'UTF-8')
         sess_key_int = int.from_bytes(raw_bytes, byteorder='little')
 
         sess_key_encrypted = pow(sess_key_int, self.recv_public_key.e, self.recv_public_key.n)
 
         sess_key_encrypted_str = str(sess_key_encrypted)
 
-        self.json_request["payload"]["sess_key"] = sess_key_encrypted_str
+        self.json_request.dhke_data["payload"]["sess_key"] = sess_key_encrypted_str
 
 
     def build_request(self):
@@ -85,6 +85,8 @@ class Client(object):
         self.json_request = JsonMessage()
 
         self.json_request.set_json_payload()
+        self.create_sess_key()
+        self.encrypt_sess_key()
 
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
