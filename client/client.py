@@ -120,9 +120,9 @@ class Client(object):
         m.update(bytes(self.json_request.dhke_data["sess_key"], 'UTF-8'))
 
         byte_value = m.digest()
-        signature_string = str(int.from_bytes(byte_value, byteorder='little'))
+        hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
 
-        self.json_request.dhke_data["payload"]["agreement_data"]["hash_sess_key"] = signature_string
+        self.json_request.dhke_data["payload"]["agreement_data"]["hash_sess_key"] = hash_sess_str
 
     def generate_diffie_pub_key(self):
         """
@@ -133,6 +133,21 @@ class Client(object):
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
 
+    def sign_agreement_data(self):
+        """
+        Function used to sign the payload messgae before encryption
+        """
+        # get raw data_agreement info
+        data_raw = json.dumps(self.json_request.dhke_data["payload"]["agreement_data"])
+
+        m = hashlib.sha3_512()
+        m.update(bytes(data_raw, 'UTF-8'))
+
+        hash_bytes = m.digest()
+        hash_int = int.from_bytes(hash_bytes, byteorder='little')
+
+        signature = str(pow(hash_int, self.recv_key.d, self.recv_public_key.n))
+        self.json_request.dhke_data["payload"]["signature"] = signature
 
     def build_request(self):
         """
@@ -146,6 +161,10 @@ class Client(object):
 
         self.hash_sess_key()
         self.generate_diffie_pub_key()
+
+        self.sign_agreement_data()
+
+        # TODO: Need to encrypt the agreement_data object using sess_key using nonce
 
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
