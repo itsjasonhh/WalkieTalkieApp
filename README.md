@@ -21,14 +21,27 @@ python >= 3
 │   ├── HashHeader.py
 │   ├── SimonCTR.py
 │   ├── __init__.py
-│   └── json_message.py
+│   ├── dh.py
+│   ├── diffie_ephemeral_to_k1_k2.py
+│   ├── ecdh.py
+│   ├── file_header.py
+│   ├── json_message.py
+│   ├── print_helper.py
+│   ├── recording.encrypted
+│   └── recording.m4a
+├── keylib
+│   ├── __init__.py
+│   ├── generate_keys.py
+│   ├── key.pem
+│   ├── keys.py
+│   └── pubkey.pem
 ├── requirements.txt
 └── server
     ├── __init__.py
     ├── client_thread.py
     └── server.py
 
-3 directories, 14 files
+4 directories, 26 files
 ```
 
 
