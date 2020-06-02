@@ -137,6 +137,7 @@ class Client(object):
         m1_c_dec = int(m1_c,2)
         m1_c_str = str(m1_c_dec)
         self.json_request.dhke_data["payload"] = m1_c_str
+
     def build_request(self):
         """
         Function used to build the initial request
@@ -202,8 +203,8 @@ class Client(object):
             msg = in_data.decode()
 
             if self.is_valid_response(msg):
+                # self.process_response()
                 print('Valid Response')
-                # 1. get key info
                 # 2. If valid response we need to send audio
             else:
                 # else close connection
