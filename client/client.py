@@ -65,7 +65,7 @@ class Client(object):
         self.pprint = PrintHelper()
 
         # TODO: needs to be dynamic this is representative of reveiver public key
-        key = RSA.generate(4000)
+        key = RSA.generate(KEY_BIT_SIZE)
         public_key = key.publickey()
         self.recv_key = key
         self.recv_public_key = public_key
@@ -80,9 +80,6 @@ class Client(object):
 
         # Connect to server
         self.clientsocket.connect((self.server, self.port))
-
-        # Generate private and public key pairs
-        self.key = RSA.generate(KEY_BIT_SIZE)
 
     def create_sess_key(self):
         """
@@ -127,6 +124,15 @@ class Client(object):
 
         self.json_request.dhke_data["payload"]["agreement_data"]["hash_sess_key"] = signature_string
 
+    def generate_diffie_pub_key(self):
+        """
+        Function used to generate the our public diffie hellman key based on g and p values
+        """
+        diffie_pub_key = pow(g, self.recv_key.d, p)
+        diffie_pub_key_str = str(diffie_pub_key)
+
+        self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
+
 
     def build_request(self):
         """
@@ -139,6 +145,7 @@ class Client(object):
         self.encrypt_sess_key()
 
         self.hash_sess_key()
+        self.generate_diffie_pub_key()
 
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
