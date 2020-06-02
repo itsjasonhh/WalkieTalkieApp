@@ -130,7 +130,7 @@ class Client(object):
         """
         #TODO: need to encrypt data useing counter mode
         #"agreement data and signature objects" to replace ???
-        m1_c = countermode_encrypt(???, self.sess_key["ToD"],self.sess_key["key"])
+        m1_c = countermode_encrypt(self.json_request.dhke_data["payload"], self.sess_key["ToD"],self.sess_key["key"])
         #self.m1_c? Not sure.
     def build_request(self):
         """
