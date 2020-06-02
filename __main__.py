@@ -5,8 +5,6 @@
 import argparse
 from server.server import Server
 from client.client import Client
-# import encryptlib.HashHeader
-# import encryptlib.SimonCTR
 
 SERVER = '127.0.0.1'
 
