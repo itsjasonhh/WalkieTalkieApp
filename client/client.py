@@ -66,7 +66,7 @@ class Client(object):
 
         sess_key = {
             "key": key_str,
-            "ToD": nonce_str
+            "ToD": tod_str
         }
 
         self.json_request.dhke_data["sess_key"] = sess_key
