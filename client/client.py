@@ -4,10 +4,16 @@
 """
 import socket
 import json
+import datetime
+import copy
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
 
 BUFFER_SIZE = 4096
+KEY_BIT_SIZE = 4000
 
 class Client(object):
     def __init__(self, server, port):
@@ -20,6 +26,13 @@ class Client(object):
         self.request = None
         self.pprint = PrintHelper()
 
+        # TODO: needs to be dynamic this is representative of reveiver public key
+        key = RSA.generate(4000)
+        public_key = key.publickey()
+        self.recv_key = key
+        self.recv_public_key = public_key
+        #TODO: need access to the public and private keys
+
     def init(self):
         """
         Function to initialize client socket
@@ -30,15 +43,47 @@ class Client(object):
         # Connect to server
         self.clientsocket.connect((self.server, self.port))
 
+        # Generate private and public key pairs
+        self.key = RSA.generate(KEY_BIT_SIZE)
+
+    def create_sess_key(self):
+        """
+        Function to create sess key
+        """
+        # 1. create a 256 bit session key
+        key = str(int.from_bytes(get_random_bytes(KEY_BIT_SIZE), byteorder='little'))
+        nonce = str(int(datetime.datetime.now().timestamp() * 1000))
+
+        sess_key = {
+            key: key,
+            nonce: nonce
+        }
+
+        this.json_request["payload"]["sess_key"] = sess_key
+
+    def encrypt_sess_key(self):
+        """
+        Function used to encrypt the sess_key object by the receivers public key
+        """
+        sess_key = copy.copy(self.json_request["payload"]["sess_key"])
+        sess_key = json.dumps(sess_key)
+
+        raw_bytes = bytes(sess_key, 'utf-8')
+        sess_key_int = int.from_bytes(raw_bytes, byteorder='little')
+
+        sess_key_encrypted = pow(sess_key_int, self.recv_public_key.e, self.recv_public_key.n)
+
+        sess_key_encrypted_str = str(sess_key_encrypted)
+
+        self.json_request["payload"]["sess_key"] = sess_key_encrypted_str
+
+
     def build_request(self):
         """
         Function used to build the initial request
         """
         self.json_request = JsonMessage()
 
-        """
-            TODO: Need to inject code to build a VALID Request
-        """
         self.json_request.set_json_payload()
 
         # Determine length of JSON payload
