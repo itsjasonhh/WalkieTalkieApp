@@ -12,6 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
+from encryptlib.SimonCTR import countermode_encrypt
 from keylib.keys import g, p
 
 BUFFER_SIZE = 4096
@@ -52,21 +53,29 @@ class Client(object):
         Function to create sess key
         """
         # 1. create a 256 bit session key
-        key = str(int.from_bytes(get_random_bytes(KEY_BIT_SIZE), byteorder='little'))
-        nonce = str(int(datetime.datetime.now().timestamp() * 1000))
+        key_int = int.from_bytes(get_random_bytes(KEY_BIT_SIZE), byteorder='little')
+        tod_int = int(datetime.datetime.now().timestamp() * 1000)
 
-        sess_key = {
-            key: key,
-            nonce: nonce
+        self.sess_key = {
+            "key": key_int,
+            "ToD": tod_int
         }
 
-        self.json_request.dhke_data["payload"]["sess_key"] = sess_key
+        key_str = str(key_int)
+        tod_str = str(tod_int)
+
+        sess_key = {
+            "key": key_str,
+            "ToD": nonce_str
+        }
+
+        self.json_request.dhke_data["sess_key"] = sess_key
 
     def encrypt_sess_key(self):
         """
         Function used to encrypt the sess_key object by the receivers public key
         """
-        sess_key = copy.copy(self.json_request.dhke_data["payload"]["sess_key"])
+        sess_key = copy.copy(self.json_request.dhke_data["sess_key"])
         sess_key = json.dumps(sess_key)
 
         raw_bytes = bytes(sess_key, 'UTF-8')
@@ -94,7 +103,7 @@ class Client(object):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
-        diffie_pub_key = pow(g, self.recv_key.d, p)
+        diffie_pub_key = pow(g, self.recv_key.d, p) # TODO : need to generate diffie priv key 4096
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
@@ -112,10 +121,10 @@ class Client(object):
         hash_bytes = m.digest()
         hash_int = int.from_bytes(hash_bytes, byteorder='little')
 
-        signature = str(pow(hash_int, self.recv_key.d, self.recv_public_key.n))
+        signature = str(pow(hash_int, self.private_key.d, self.recv_public_key.n))
         self.json_request.dhke_data["payload"]["signature"] = signature
 
-    def encrypt_agreement_data():
+    def encrypt_agreement_data(self):
         """
         Function used to encrypt the agreement data using conter mode.
         """

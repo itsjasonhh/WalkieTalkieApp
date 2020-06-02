@@ -45,10 +45,6 @@ class JsonMessage(object):
         self.set_signature()
         self.set_sess_key()
 
-        epoch = datetime.datetime.now().timestamp() * 1000
-        epoch = int(epoch)
-        self.dhke_data["payload"]["TOD"] = epoch
-
     def encrypt_payload(self):
         """
         Function to encrypt the message payload

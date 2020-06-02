@@ -60,7 +60,7 @@ def main():
         """
             We are the server and we are open to accepting requests
         """
-        server = Server('', args.PORT)
+        server = Server('', args.PORT, pubkey, key)
         server.init()
         server.run()
 
@@ -68,7 +68,7 @@ def main():
         """
             We are a client and we want to send a request
         """
-        client = Client(SERVER, args.PORT, public_key, private_key)
+        client = Client(SERVER, args.PORT, pubkey, key)
         client.init()
         client.run()
 
