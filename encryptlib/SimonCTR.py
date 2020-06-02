@@ -24,7 +24,7 @@ class SIMON:
         return ((x << (self.__dim - i)) % self.__mod) | (x >> i)
 
     def change_key(self, master_key):
-        assert 0 <= master_key < (1 << self.key_size)
+        #assert 0 <= master_key < (1 << self.key_size)
         c = (1 << self.__dim) - 4
         m = self.key_size // self.__dim
         self.__round_key = []

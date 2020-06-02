@@ -132,7 +132,8 @@ class Client(object):
         data_raw = json.dumps(self.json_request.dhke_data["payload"])
         data_bytes = bytes(data_raw,'UTF-8')
         data_int = int.from_bytes(data_bytes, byteorder='little')
-        m1_c = countermode_encrypt(data_int, self.sess_key["ToD"],self.sess_key["key"])
+        data_int_in_binary = bin(data_int)[2:]
+        m1_c = countermode_encrypt(data_int_in_binary, self.sess_key["ToD"],self.sess_key["key"])
         m1_c_dec = int(m1_c,2)
         m1_c_str = str(m1_c_dec)
         self.json_request.dhke_data["payload"] = m1_c_str
