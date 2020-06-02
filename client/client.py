@@ -128,7 +128,6 @@ class Client(object):
         """
         Function used to encrypt the agreement data using conter mode.
         """
-        #TODO: need to encrypt data useing counter mode
         data_raw = json.dumps(self.json_request.dhke_data["payload"])
         data_bytes = bytes(data_raw,'UTF-8')
         data_int = int.from_bytes(data_bytes, byteorder='little')
