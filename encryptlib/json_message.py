@@ -70,10 +70,8 @@ class JsonMessage(object):
         """
         Function used to handle setting agreement data parameters
         """
-        self.dhke_data["payload"]["agreement_data"]["sender_public_key"] = 696969
         self.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = 696969
-        self.dhke_data["payload"]["agreement_data"]["generator"] = 696969
-        self.dhke_data["payload"]["agreement_data"]["modulus"] = 696969
+        self.dhke_data["payload"]["agreement_data"]["hash_sess_key"] = 696969
 
     def set_signature(self):
         """
