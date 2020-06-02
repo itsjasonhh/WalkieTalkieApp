@@ -1,13 +1,13 @@
 # encrypt-server
 Sever used to send and receive requests for encrypting audio
 
-## Requirements
+# Requirements
 Software requirements, python version 3 or greater.
 ```
 python >= 3
 ```
 
-## Repo Structure
+# Repo Structure
 ```
 .
 ├── Makefile
@@ -44,6 +44,18 @@ python >= 3
 4 directories, 26 files
 ```
 
+# Documentation
+Here is a small description of the different directories that are included in this
+software package
+
+
+## encrypt-server/keylib
+Library where key and key parameters are kept
+
+
+## encryptlib
+Location of where encryption methods and ciphers
+
 
 # Run Software
 ## Run Server (Listener)
@@ -63,7 +75,7 @@ python __main__.py 8080 --talker
 ```
 The **encrypt-server/client** directory handles the setting up of the client connection (Talker)
 
-## Software Help
+# Software Help
 Run the following command to get a help menu output of valid parameters
 ```
 python __main__.py -h
@@ -83,7 +95,7 @@ optional arguments:
                   encrpyt data
 ```
 
-## Setup Virtual Environment
+# Setup Virtual Environment
 Setting up a virtual enviorment is a good idea in case we need to install
 packages that are specific for the application
 ```
