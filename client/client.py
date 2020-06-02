@@ -149,6 +149,13 @@ class Client(object):
         signature = str(pow(hash_int, self.recv_key.d, self.recv_public_key.n))
         self.json_request.dhke_data["payload"]["signature"] = signature
 
+    def encrypt_agreement_data():
+        """
+        Function used to encrypt the agreement data using conter mode.
+        """
+        #TODO: need to encrypt data useing counter mode
+        pass
+
     def build_request(self):
         """
         Function used to build the initial request
@@ -164,7 +171,7 @@ class Client(object):
 
         self.sign_agreement_data()
 
-        # TODO: Need to encrypt the agreement_data object using sess_key using nonce
+        self.encrypt_agreement_data()
 
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
