@@ -129,9 +129,11 @@ class Client(object):
         Function used to encrypt the agreement data using conter mode.
         """
         #TODO: need to encrypt data useing counter mode
-        #"agreement data and signature objects" to replace ???
-        m1_c = countermode_encrypt(self.json_request.dhke_data["payload"], self.sess_key["ToD"],self.sess_key["key"])
-        #self.m1_c? Not sure.
+        data_raw = json.dumps(self.json_request.dhke_data["payload"])
+        data_bytes = bytes(data_raw,'UTF-8')
+        data_int = int.from_bytes(data_bytes, byteorder='little')
+        m1_c = countermode_encrypt(data_int, self.sess_key["ToD"],self.sess_key["key"])
+        self.json_request.dhke_data["payload"] = m1_c
     def build_request(self):
         """
         Function used to build the initial request
