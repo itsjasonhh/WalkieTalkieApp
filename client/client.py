@@ -12,7 +12,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
-from keys.keys import g, p
+from keylib.keys import g, p
 
 BUFFER_SIZE = 4096
 KEY_BIT_SIZE = 4000
