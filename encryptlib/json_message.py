@@ -14,19 +14,15 @@ class JsonMessage(object):
         """
         self.dhke_data = {
             "payload": {
-                "TOD": 0,
                 "agreement_data": {
-                    "who_sent": WHO_SENT,
-                    "sender_public_key": 0,
-                    "diffie_pub_k": 0,
-                    "generator": 0,
-                    "modulus": 0,
+                    "hash_sess_key": "",
+                    "diffie_pub_k": ""
                 },
-                "signature": 0
+                "signature": ""
             },
             "sess_key": {
-                "key": 0, # 256 bits
-                "nonce": 0 # ToD
+                "key": "", # 256 bits
+                "nonce": "" # ToD
             }
        }
 
