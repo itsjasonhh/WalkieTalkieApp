@@ -129,8 +129,9 @@ class Client(object):
         Function used to encrypt the agreement data using conter mode.
         """
         #TODO: need to encrypt data useing counter mode
-        pass
-
+        #"agreement data and signature objects" to replace ???
+        m1_c = countermode_encrypt(???, self.sess_key["ToD"],self.sess_key["key"])
+        #self.m1_c? Not sure.
     def build_request(self):
         """
         Function used to build the initial request
