@@ -120,7 +120,37 @@ class ClientThread(threading.Thread):
         """
         self.decrypt_sess_key()
         self.decrypt_payload()
-        self.verify_sign()
+        is_valid_sign = self.verify_sign()
+
+        if is_valid_sign:
+            # continue processing
+            is_valid_hash = self.verify_hash()
+
+            if is_valid_sign:
+                # continue processing
+                print('valid so far')
+            else:
+                #close connection
+                pass
+        else:
+            # need to close connection
+            pass
+
+    def verify_hash(self):
+        """
+        Function to verify sess_key_hash
+        """
+        raw_sess_key = json.dumps(self.json_request["sess_key"])
+
+        m = hashlib.sha3_512()
+        m.update(bytes(raw_sess_key, 'utf-8'))
+        byte_value = m.digest()
+        hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
+
+        if hash_sess_str == self.json_request["payload"]["agreement_data"]["hash_sess_key"]:
+            return True
+        else:
+            return False
 
     def verify_sign(self):
         """
