@@ -93,7 +93,9 @@ class Client(object):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
-        diffie_pub_key = pow(g, self.private_key.d, p) # TODO : need to generate diffie priv key 4096
+        self.d_a = int.from_bytes(get_random_bytes(512), byteorder='little')
+
+        diffie_pub_key = pow(g, self.d_a, p)
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
