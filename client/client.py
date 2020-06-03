@@ -82,7 +82,7 @@ class Client(object):
         """
         Function used to hash the sess key, needed to encryp the payload
         """
-        m = hashlib.sha3_512()
+        m = hashlib.sha3_256()
         raw_sess_key = json.dumps(self.json_request.dhke_data["sess_key"])
         m.update(bytes(raw_sess_key, 'UTF-8'))
 
@@ -110,7 +110,7 @@ class Client(object):
         # get raw data_agreement info
         data_raw = json.dumps(self.json_request.dhke_data["payload"]["agreement_data"])
 
-        m = hashlib.sha3_512()
+        m = hashlib.sha3_256()
         m.update(bytes(data_raw, 'UTF-8'))
 
         hash_bytes = m.digest()
@@ -215,7 +215,7 @@ class Client(object):
         """
         raw_sess_key = json.dumps(self.json_response["sess_key"])
 
-        m = hashlib.sha3_512()
+        m = hashlib.sha3_256()
         m.update(bytes(raw_sess_key, 'utf-8'))
         byte_value = m.digest()
         hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
@@ -237,7 +237,7 @@ class Client(object):
         sign_val = pow(int_val, self.public_key.e, self.public_key.n)
 
         data_raw = json.dumps(self.json_response["payload"]["agreement_data"])
-        m = hashlib.sha3_512()
+        m = hashlib.sha3_256()
         m.update(bytes(data_raw, 'utf-8'))
 
         hash_bytes = m.digest()
