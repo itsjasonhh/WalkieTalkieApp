@@ -8,10 +8,11 @@ import sys
 import os
 import math
 import hashlib
-
+from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
 from encryptlib.SimonCTR import countermode_decrypt
+from keylib.keys import g, p
 
 BUFFER_SIZE = 32000
 HEADER_SIZE = 9
@@ -100,6 +101,9 @@ class ClientThread(threading.Thread):
         """
         self.json_response = JsonMessage()
         self.create_sess_key()
+        self.hash_sess_key()
+        self.encrypt_sess_key()
+        self.generate_diffie_pub_key()
 
         # Determine length of JSON payload
         length = len(self.json_response.__str__())
@@ -108,6 +112,44 @@ class ClientThread(threading.Thread):
         # form entire request
         self.response = '{0}{1}{2}'.format('2', length_str, self.json_response.__str__())
         self.pprint.sent('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
+
+    def generate_diffie_pub_key(self):
+        """
+        Function used to generate the our public diffie hellman key based on g and p values
+        """
+        # TODO: need to generate correct size Diffie Hellman priv key
+        self.d_b = int.from_bytes(get_random_bytes(32), byteorder='little')
+
+        diffie_pub_key = pow(g, self.private_key.d, p)
+        diffie_pub_key_str = str(diffie_pub_key)
+
+        self.json_response.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
+
+    def encrypt_sess_key(self):
+        """
+        Function used to encrypt the sess_key object by the receivers public key
+        """
+        sess_key = json.dumps(self.json_response.dhke_data["sess_key"])
+
+        raw_bytes = sess_key.encode('utf-8')
+        sess_key_int = int.from_bytes(raw_bytes, byteorder='little')
+
+        sess_key_encrypted = pow(sess_key_int, self.public_key.e, self.public_key.n)
+
+        self.json_response.dhke_data["sess_key"] = str(sess_key_encrypted)
+
+    def hash_sess_key(self):
+        """
+        Function used to hash the sess key
+        """
+        m = hashlib.sha3_512()
+        raw_sess_key = json.dumps(self.json_response.dhke_data["sess_key"])
+        m.update(bytes(raw_sess_key, 'UTF-8'))
+
+        byte_value = m.digest()
+        hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
+
+        self.json_response.dhke_data["payload"]["agreement_data"]["hash_sess_key"] = hash_sess_str
 
     def process_request(self):
         """
@@ -152,7 +194,7 @@ class ClientThread(threading.Thread):
             "key": key_str
         }
 
-        self.json_request.dhke_data["sess_key"] = sess_key
+        self.json_response.dhke_data["sess_key"] = sess_key
 
     def verify_hash(self):
         """
