@@ -7,12 +7,13 @@ import json
 import datetime
 import copy
 import hashlib
+import math
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
-from encryptlib.SimonCTR import countermode_encrypt
+from encryptlib.SimonCTR import countermode_encrypt, countermode_decrypt
 from keylib.keys import g, p
 
 BUFFER_SIZE = 32768
@@ -182,6 +183,113 @@ class Client(object):
         self.pprint.received('\nResponse >>>\n----------\n{0}\n----------'.format(response))
         return True
 
+    def process_response(self):
+        """
+        Function used to process the response from the server/listener
+        """
+        """
+            Begin Processing response JSON object
+        """
+        self.decrypt_sess_key()
+        self.decrypt_payload()
+        is_valid_sign = self.verify_sign()
+
+        if is_valid_sign:
+            # continue processing
+            is_valid_hash = self.verify_hash()
+
+            if is_valid_sign:
+                # Now need to start building response
+                # hence return and call self.build_response()
+                return
+            else:
+                #close connection
+                pass
+        else:
+            # need to close connection
+            pass
+
+    def verify_hash(self):
+        """
+        Function used to verify the hash of the incoming message
+        """
+        raw_sess_key = json.dumps(self.json_response["sess_key"])
+
+        m = hashlib.sha3_512()
+        m.update(bytes(raw_sess_key, 'utf-8'))
+        byte_value = m.digest()
+        hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
+
+        if hash_sess_str == self.json_response["payload"]["agreement_data"]["hash_sess_key"]:
+            return True
+        else:
+            return False
+
+
+
+    def verify_sign(self):
+        """
+        Function to verify signature of packet 1 from talker
+        """
+        signature_raw = self.json_response["payload"]["signature"]
+        int_val = int(signature_raw)
+
+        sign_val = pow(int_val, self.public_key.e, self.public_key.n)
+
+        data_raw = json.dumps(self.json_response["payload"]["agreement_data"])
+        m = hashlib.sha3_512()
+        m.update(bytes(data_raw, 'utf-8'))
+
+        hash_bytes = m.digest()
+        hash_int = int.from_bytes(hash_bytes, byteorder='little')
+
+        if sign_val == hash_int:
+            return True
+        else:
+            return False
+
+
+
+    def decrypt_payload(self):
+        """
+        Function used to decrypt payload of request
+        """
+        key = int(self.json_response["sess_key"]["key"])
+        nonce = self.sess_key["ToD"]
+
+        data_raw = self.json_response["payload"]
+        data_int = int(data_raw)
+        data_int_in_binary = bin(data_int)[2:]
+
+        m2_c = countermode_decrypt(data_int_in_binary, nonce, key)
+        m2_c_dec = int(m2_c, 2)
+        m2_c_str = str(m2_c_dec)
+
+        length = int(math.ceil(m2_c_dec.bit_length() / 8))
+
+        payload_str = m2_c_dec.to_bytes(length, byteorder='little')
+        # TODO: Something's this fails, idk why
+        payload_str = payload_str.decode('utf-8')
+
+        self.json_response["payload"] = json.loads(payload_str)
+
+
+    def decrypt_sess_key(self):
+        """
+        Function used to decrypt the sess_key we received in response from server/listener
+        """
+        data_raw = self.json_response["sess_key"]
+        data_int = int(data_raw)
+
+        sess_key_decrypted = pow(data_int, self.private_key.d, self.private_key.n)
+
+        length = int(math.ceil(sess_key_decrypted.bit_length() / 8))
+
+        sess_str = sess_key_decrypted.to_bytes(length, byteorder='little')
+        sess_str = sess_str.decode('utf-8')
+
+        self.json_response["sess_key"] = json.loads(sess_str)
+
 
     def run(self):
         """
@@ -196,8 +304,7 @@ class Client(object):
 
             if self.is_valid_response(msg):
                 # self.process_response()
-                print('Valid Response')
-                #self.process_response()
+                self.process_response()
                 # 1. get key info
                     #Receives (m2c, ses2)
                     #Calculates m2a by decrypting ses2 using Alice's RSA private key
