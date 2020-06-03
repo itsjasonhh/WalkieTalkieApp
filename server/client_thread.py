@@ -7,6 +7,7 @@ import json
 import sys
 import os
 import math
+import hashlib
 
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
@@ -119,6 +120,28 @@ class ClientThread(threading.Thread):
         """
         self.decrypt_sess_key()
         self.decrypt_payload()
+        self.verify_sign()
+
+    def verify_sign(self):
+        """
+        Function to verify signature of packet 1 from talker
+        """
+        signature_raw = self.json_request["payload"]["signature"]
+        int_val = int(signature_raw)
+
+        sign_val = pow(int_val, self.public_key.e, self.public_key.n)
+
+        data_raw = json.dumps(self.json_request["payload"]["agreement_data"])
+        m = hashlib.sha3_512()
+        m.update(bytes(data_raw, 'utf-8'))
+
+        hash_bytes = m.digest()
+        hash_int = int.from_bytes(hash_bytes, byteorder='little')
+
+        if sign_val == hash_int:
+            return True
+        else:
+            return False
 
     def decrypt_payload(self):
         """
