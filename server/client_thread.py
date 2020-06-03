@@ -117,6 +117,14 @@ class ClientThread(threading.Thread):
             Begin Processing request JSON object
         """
         self.decrypt_sess_key()
+        self.decrypt_payload()
+
+    def decrypt_payload(self):
+        """
+        Function used to decrypt payload of request
+        """
+        key = int(self.json_request["sess_key"]["key"])
+        nonce = int(self.json_request["sess_key"]["ToD"])
 
     def decrypt_sess_key(self):
         """
