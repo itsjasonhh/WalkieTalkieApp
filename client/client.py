@@ -94,6 +94,7 @@ class Client(object):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
+        # TODO: need to generate correct size Diffie Hellman priv key
         self.d_a = int.from_bytes(get_random_bytes(32), byteorder='little')
 
         diffie_pub_key = pow(g, self.private_key.d, p)
@@ -137,7 +138,6 @@ class Client(object):
         """
         self.json_request = JsonMessage()
 
-        self.json_request.set_json_payload()
         self.create_sess_key()
         self.hash_sess_key()
         self.encrypt_sess_key()

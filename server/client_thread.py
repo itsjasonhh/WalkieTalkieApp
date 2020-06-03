@@ -98,10 +98,8 @@ class ClientThread(threading.Thread):
         """
         Function to handle sending a response to the client
         """
-        """
-            TODO: Need to inject code to build a VALID Response
-        """
-        self.json_response.set_json_payload()
+        self.json_response = JsonMessage()
+        self.create_sess_key()
 
         # Determine length of JSON payload
         length = len(self.json_response.__str__())
@@ -127,14 +125,34 @@ class ClientThread(threading.Thread):
             is_valid_hash = self.verify_hash()
 
             if is_valid_sign:
-                # continue processing
-                print('valid so far')
+                # Now need to start building response
+                # hence return and call self.build_response()
+                return
             else:
                 #close connection
                 pass
         else:
             # need to close connection
             pass
+
+    def create_sess_key(self):
+        """
+        Function to create sess_key.key value
+        """
+        # 1. create a 256 bit session key
+        key_int = int.from_bytes(get_random_bytes(32), byteorder='little')
+
+        self.sess_key = {
+            "key": key_int
+        }
+
+        key_str = str(key_int)
+
+        sess_key = {
+            "key": key_str
+        }
+
+        self.json_request.dhke_data["sess_key"] = sess_key
 
     def verify_hash(self):
         """
@@ -191,6 +209,7 @@ class ClientThread(threading.Thread):
         length = int(math.ceil(m1_c_dec.bit_length() / 8))
 
         payload_str = m1_c_dec.to_bytes(length, byteorder='little')
+        # TODO: Something's this fails, idk why
         payload_str = payload_str.decode('utf-8')
 
         self.json_request["payload"] = json.loads(payload_str)
