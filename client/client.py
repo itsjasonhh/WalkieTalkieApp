@@ -15,6 +15,7 @@ from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
 from encryptlib.SimonCTR import countermode_encrypt, countermode_decrypt
 from keylib.keys import g, p
+from diffie_ephemeral_to_k1_k2 import get_k1_and_k2
 
 BUFFER_SIZE = 32768
 KEY_BIT_SIZE = 4000
@@ -332,13 +333,18 @@ class Client(object):
                 # 2. get key info
                     #Receives (m2c, ses2)
                     #Calculates m2a by decrypting ses2 using Alice's RSA private key
+                    #m2a = pow(ses2,self.private_key.d,self.private_key.n)
                     #m2a reveals sb
+                    #sb = m2a["key"]
                     #Calculates (m2b, sig2) by countermode-decrypting m2c using sb, tod as key and nonce
+                    #m2b, sig2 = countermode_decrypt(m2c,self.sess_key["ToD"],sb)
                     #Verify e_kb(sig2) = sha3_512(m2b)
+                    #pow(sig2,bob's_public_key,self.private_key.n) == sha3_512(m2b)
                     #m2b reveals hash session key h and diffie-hellman public key D_b
                     #Verify h = sha3_512(m2a)
+                    #h == sha3_512(m2a)
                     #Calculate k1 and k2: k1||k2 = sha3_512(D_b ^ d_a mod p)
-
+                    #k1,k2 = get_k1_and_k2(self.private_key.d, D_b)
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
                     #Calculate tag = sha3_512(k2 || D)
