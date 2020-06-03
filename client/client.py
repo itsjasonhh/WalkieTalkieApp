@@ -96,7 +96,7 @@ class Client(object):
         Function used to generate the our public diffie hellman key based on g and p values
         """
         # TODO: need to generate correct size Diffie Hellman priv key
-        self.d_a = int.from_bytes(get_random_bytes(32), byteorder='little')
+        self.d_a = int.from_bytes(get_random_bytes(512), byteorder='little')
 
         diffie_pub_key = pow(g, self.private_key.d, p)
         diffie_pub_key_str = str(diffie_pub_key)
@@ -305,6 +305,7 @@ class Client(object):
             if self.is_valid_response(msg):
                 # self.process_response()
                 self.process_response()
+                print('YAY, Recieved message 2 from Bob.\nNeed to process\nExiting...')
 
                 # 1. Need to process message 2
 

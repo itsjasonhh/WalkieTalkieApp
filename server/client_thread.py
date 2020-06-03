@@ -153,7 +153,7 @@ class ClientThread(threading.Thread):
         Function used to generate the our public diffie hellman key based on g and p values
         """
         # TODO: need to generate correct size Diffie Hellman priv key
-        self.d_b = int.from_bytes(get_random_bytes(32), byteorder='little')
+        self.d_b = int.from_bytes(get_random_bytes(512), byteorder='little')
 
         diffie_pub_key = pow(g, self.private_key.d, p)
         diffie_pub_key_str = str(diffie_pub_key)
