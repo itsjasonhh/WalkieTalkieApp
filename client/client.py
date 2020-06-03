@@ -82,7 +82,8 @@ class Client(object):
         Function used to hash the sess key, needed to encryp the payload
         """
         m = hashlib.sha3_512()
-        m.update(bytes(self.json_request.dhke_data["sess_key"], 'UTF-8'))
+        raw_sess_key = json.dumps(self.json_request.dhke_data["sess_key"])
+        m.update(bytes(raw_sess_key, 'UTF-8'))
 
         byte_value = m.digest()
         hash_sess_str = str(int.from_bytes(byte_value, byteorder='little'))
@@ -93,9 +94,9 @@ class Client(object):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
-        self.d_a = int.from_bytes(get_random_bytes(512), byteorder='little')
+        self.d_a = int.from_bytes(get_random_bytes(32), byteorder='little')
 
-        diffie_pub_key = pow(g, self.d_a, p)
+        diffie_pub_key = pow(g, self.private_key.d, p)
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
@@ -138,9 +139,8 @@ class Client(object):
 
         self.json_request.set_json_payload()
         self.create_sess_key()
-        self.encrypt_sess_key()
-
         self.hash_sess_key()
+        self.encrypt_sess_key()
         self.generate_diffie_pub_key()
 
         self.sign_agreement_data()
