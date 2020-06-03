@@ -135,7 +135,12 @@ class ClientThread(threading.Thread):
         m1_c_dec = int(m1_c, 2)
         m1_c_str = str(m1_c_dec)
 
-        self.json_request["payload"] = m1_c_str
+        length = int(math.ceil(m1_c_dec.bit_length() / 8))
+
+        payload_str = m1_c_dec.to_bytes(length, byteorder='little')
+        payload_str = payload_str.decode('utf-8')
+
+        self.json_request["payload"] = json.loads(payload_str)
 
     def decrypt_sess_key(self):
         """
