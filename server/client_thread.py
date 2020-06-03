@@ -6,11 +6,12 @@ import threading
 import json
 import sys
 import os
+import math
 
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
 
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 32000
 HEADER_SIZE = 9
 
 class ClientThread(threading.Thread):
@@ -95,8 +96,6 @@ class ClientThread(threading.Thread):
         """
         Function to handle sending a response to the client
         """
-        self.json_response = JsonMessage()
-
         """
             TODO: Need to inject code to build a VALID Response
         """
@@ -114,7 +113,26 @@ class ClientThread(threading.Thread):
         """
         Function used to process the request get contents from payload
         """
-        pass
+        """
+            Begin Processing request JSON object
+        """
+        self.decrypt_sess_key()
+
+    def decrypt_sess_key(self):
+        """
+        Function used to decrypt the sess_key we received in request
+        """
+        data_raw = self.json_request["sess_key"]
+        data_int = int(data_raw)
+
+        sess_key_decrypted = pow(data_int, self.private_key.d, self.private_key.n)
+
+        length = int(math.ceil(sess_key_decrypted.bit_length() / 8))
+
+        sess_str = sess_key_decrypted.to_bytes(length, byteorder='little')
+        sess_str = sess_str.decode('utf-8')
+
+        self.json_request["sess_key"] = json.loads(sess_str)
 
     def is_valid_file_header(self, message):
         """

@@ -25,6 +25,8 @@ class Server(object):
         # Create an INET, STREAMing socket
         self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        self.serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         # Bind socket to a public host and port
         self.serversocket.bind((self.host, self.port))
 

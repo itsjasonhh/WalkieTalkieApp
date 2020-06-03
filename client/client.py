@@ -31,13 +31,6 @@ class Client(object):
         self.private_key = private_key
         self.pprint = PrintHelper()
 
-        # TODO: needs to be dynamic this is representative of reveiver public key
-        key = RSA.generate(KEY_BIT_SIZE)
-        public_key = key.publickey()
-        self.recv_key = key
-        self.recv_public_key = public_key
-        #TODO: need access to the public and private keys
-
     def init(self):
         """
         Function to initialize client socket
@@ -53,7 +46,7 @@ class Client(object):
         Function to create sess key
         """
         # 1. create a 256 bit session key
-        key_int = int.from_bytes(get_random_bytes(KEY_BIT_SIZE), byteorder='little')
+        key_int = int.from_bytes(get_random_bytes(32), byteorder='little')
         tod_int = int(datetime.datetime.now().timestamp() * 1000)
 
         self.sess_key = {
@@ -75,17 +68,14 @@ class Client(object):
         """
         Function used to encrypt the sess_key object by the receivers public key
         """
-        sess_key = copy.copy(self.json_request.dhke_data["sess_key"])
-        sess_key = json.dumps(sess_key)
+        sess_key = json.dumps(self.json_request.dhke_data["sess_key"])
 
-        raw_bytes = bytes(sess_key, 'UTF-8')
+        raw_bytes = sess_key.encode('utf-8')
         sess_key_int = int.from_bytes(raw_bytes, byteorder='little')
 
-        sess_key_encrypted = pow(sess_key_int, self.recv_public_key.e, self.recv_public_key.n)
+        sess_key_encrypted = pow(sess_key_int, self.public_key.e, self.public_key.n)
 
-        sess_key_encrypted_str = str(sess_key_encrypted)
-
-        self.json_request.dhke_data["sess_key"] = sess_key_encrypted_str
+        self.json_request.dhke_data["sess_key"] = str(sess_key_encrypted)
 
     def hash_sess_key(self):
         """
@@ -103,7 +93,7 @@ class Client(object):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
-        diffie_pub_key = pow(g, self.recv_key.d, p) # TODO : need to generate diffie priv key 4096
+        diffie_pub_key = pow(g, self.private_key.d, p) # TODO : need to generate diffie priv key 4096
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
@@ -121,7 +111,7 @@ class Client(object):
         hash_bytes = m.digest()
         hash_int = int.from_bytes(hash_bytes, byteorder='little')
 
-        signature = str(pow(hash_int, self.private_key.d, self.recv_public_key.n))
+        signature = str(pow(hash_int, self.private_key.d, self.public_key.n))
         self.json_request.dhke_data["payload"]["signature"] = signature
 
     def encrypt_agreement_data(self):
