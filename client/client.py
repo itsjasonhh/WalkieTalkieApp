@@ -127,6 +127,16 @@ class Client(object):
         data_bytes = bytes(data_raw,'UTF-8')
         data_int = int.from_bytes(data_bytes, byteorder='little')
         data_int_in_binary = bin(data_int)[2:]
+
+        """
+            Check to see if binary data is divisible by 8
+        """
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
         m1_c = countermode_encrypt(data_int_in_binary, self.sess_key["ToD"], self.sess_key["key"])
         m1_c_dec = int(m1_c, 2)
         m1_c_str = str(m1_c_dec)
@@ -154,7 +164,7 @@ class Client(object):
 
         # form entire request
         self.request = '{0}{1}{2}'.format('1', length_str, self.json_request.__str__())
-        self.pprint.sent('\nRequest <<<\n----------\n{0}\n----------'.format(self.request))
+        # self.pprint.sent('\nRequest <<<\n----------\n{0}\n----------'.format(self.request))
 
     def is_valid_response(self, response):
         """
@@ -180,7 +190,7 @@ class Client(object):
             # invalid JSON object
             return False
 
-        self.pprint.received('\nResponse >>>\n----------\n{0}\n----------'.format(response))
+        # self.pprint.received('\nResponse >>>\n----------\n{0}\n----------'.format(response))
         return True
 
     def process_response(self):
@@ -260,6 +270,16 @@ class Client(object):
         data_raw = self.json_response["payload"]
         data_int = int(data_raw)
         data_int_in_binary = bin(data_int)[2:]
+
+        """
+            Check to see if binary data is divisible by 8
+        """
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
 
         m2_c = countermode_decrypt(data_int_in_binary, nonce, key)
         m2_c_dec = int(m2_c, 2)

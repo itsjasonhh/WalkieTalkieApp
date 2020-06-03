@@ -92,7 +92,7 @@ class ClientThread(threading.Thread):
             # invalid JSON object
             return False
 
-        self.pprint.received('\nRequest >>>\n----------\n{0}\n----------'.format(request))
+        # self.pprint.received('\nRequest >>>\n----------\n{0}\n----------'.format(request))
         return True
 
     def build_response(self):
@@ -115,7 +115,7 @@ class ClientThread(threading.Thread):
 
         # form entire request
         self.response = '{0}{1}{2}'.format('2', length_str, self.json_response.__str__())
-        self.pprint.sent('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
+        # self.pprint.sent('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
 
     def encrypt_agreement_data(self):
         """
@@ -125,6 +125,16 @@ class ClientThread(threading.Thread):
         data_bytes = bytes(data_raw,'UTF-8')
         data_int = int.from_bytes(data_bytes, byteorder='little')
         data_int_in_binary = bin(data_int)[2:]
+
+        """
+            Check to see if binary data is divisible by 8
+        """
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
         nonce = int(self.json_request["sess_key"]["ToD"])
         m1_c = countermode_encrypt(data_int_in_binary, nonce, self.sess_key["key"])
         m1_c_dec = int(m1_c, 2)
@@ -277,7 +287,18 @@ class ClientThread(threading.Thread):
 
         data_raw = self.json_request["payload"]
         data_int = int(data_raw)
+
+        length = int(math.ceil(data_int.bit_length() / 8))
         data_int_in_binary = bin(data_int)[2:]
+
+        """
+            Check to see if binary data is divisible by 8
+        """
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
 
         m1_c = countermode_decrypt(data_int_in_binary, nonce, key)
         m1_c_dec = int(m1_c, 2)
@@ -286,7 +307,7 @@ class ClientThread(threading.Thread):
         length = int(math.ceil(m1_c_dec.bit_length() / 8))
 
         payload_str = m1_c_dec.to_bytes(length, byteorder='little')
-        # TODO: Something's this fails, idk why
+        # TODO: passes but maybe we should add a try catch in case decode fails
         payload_str = payload_str.decode('utf-8')
 
         self.json_request["payload"] = json.loads(payload_str)
