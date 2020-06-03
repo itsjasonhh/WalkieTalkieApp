@@ -10,6 +10,7 @@ import math
 
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
+from encryptlib.SimonCTR import countermode_decrypt
 
 BUFFER_SIZE = 32000
 HEADER_SIZE = 9
@@ -125,6 +126,16 @@ class ClientThread(threading.Thread):
         """
         key = int(self.json_request["sess_key"]["key"])
         nonce = int(self.json_request["sess_key"]["ToD"])
+
+        data_raw = self.json_request["payload"]
+        data_int = int(data_raw)
+        data_int_in_binary = bin(data_int)[2:]
+
+        m1_c = countermode_decrypt(data_int_in_binary, nonce, key)
+        m1_c_dec = int(m1_c, 2)
+        m1_c_str = str(m1_c_dec)
+
+        self.json_request["payload"] = m1_c_str
 
     def decrypt_sess_key(self):
         """
