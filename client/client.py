@@ -15,7 +15,7 @@ from encryptlib.print_helper import PrintHelper
 from encryptlib.SimonCTR import countermode_encrypt
 from keylib.keys import g, p
 
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 32768
 KEY_BIT_SIZE = 4000
 
 class Client(object):
@@ -197,6 +197,7 @@ class Client(object):
             if self.is_valid_response(msg):
                 # self.process_response()
                 print('Valid Response')
+                #self.process_response()
                 # 1. get key info
                     #Receives (m2c, ses2)
                     #Calculates m2a by decrypting ses2 using Alice's RSA private key
@@ -206,9 +207,9 @@ class Client(object):
                     #m2b reveals hash session key h and diffie-hellman public key D_b
                     #Verify h = sha3_512(m2a)
                     #Calculate k1 and k2: k1||k2 = sha3_512(D_b ^ d_a mod p)
-                
+
                 # 2. If valid response we need to send audio
-                    #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce 
+                    #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
                     #Calculate tag = sha3_512(k2 || D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)

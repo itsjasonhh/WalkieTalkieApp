@@ -11,10 +11,10 @@ import hashlib
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
-from encryptlib.SimonCTR import countermode_decrypt
+from encryptlib.SimonCTR import countermode_decrypt, countermode_encrypt
 from keylib.keys import g, p
 
-BUFFER_SIZE = 32000
+BUFFER_SIZE = 32768
 HEADER_SIZE = 9
 
 class ClientThread(threading.Thread):
@@ -105,6 +105,10 @@ class ClientThread(threading.Thread):
         self.encrypt_sess_key()
         self.generate_diffie_pub_key()
 
+        self.sign_agreement_data()
+
+        self.encrypt_agreement_data()
+
         # Determine length of JSON payload
         length = len(self.json_response.__str__())
         length_str = '{:08d}'.format(length)
@@ -112,6 +116,37 @@ class ClientThread(threading.Thread):
         # form entire request
         self.response = '{0}{1}{2}'.format('2', length_str, self.json_response.__str__())
         self.pprint.sent('\nResponse <<<\n----------\n{0}\n----------'.format(self.response))
+
+    def encrypt_agreement_data(self):
+        """
+        Function used to encrypt the agreement data using conter mode.
+        """
+        data_raw = json.dumps(self.json_response.dhke_data["payload"])
+        data_bytes = bytes(data_raw,'UTF-8')
+        data_int = int.from_bytes(data_bytes, byteorder='little')
+        data_int_in_binary = bin(data_int)[2:]
+        nonce = int(self.json_request["sess_key"]["ToD"])
+        m1_c = countermode_encrypt(data_int_in_binary, nonce, self.sess_key["key"])
+        m1_c_dec = int(m1_c, 2)
+        m1_c_str = str(m1_c_dec)
+
+        self.json_response.dhke_data["payload"] = m1_c_str
+
+    def sign_agreement_data(self):
+        """
+        Function used to sign the payload messgae before encryption
+        """
+        # get raw data_agreement info
+        data_raw = json.dumps(self.json_response.dhke_data["payload"]["agreement_data"])
+
+        m = hashlib.sha3_512()
+        m.update(bytes(data_raw, 'UTF-8'))
+
+        hash_bytes = m.digest()
+        hash_int = int.from_bytes(hash_bytes, byteorder='little')
+
+        signature = str(pow(hash_int, self.private_key.d, self.public_key.n))
+        self.json_response.dhke_data["payload"]["signature"] = signature
 
     def generate_diffie_pub_key(self):
         """
