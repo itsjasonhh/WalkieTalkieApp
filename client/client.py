@@ -100,7 +100,7 @@ class Client(object):
         # TODO: need to generate correct size Diffie Hellman priv key
         self.d_a = int.from_bytes(get_random_bytes(512), byteorder='little')
 
-        diffie_pub_key = pow(g, self.private_key.d, p)
+        diffie_pub_key = pow(g, self.d_a, p)
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_request.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str
@@ -335,6 +335,8 @@ class Client(object):
                     #Receives (m2c, ses2)
                     #Calculates m2a by decrypting ses2 using Alice's RSA private key
                     #m2a = pow(ses2,self.private_key.d,self.private_key.n)
+                def get_m2a(self):
+                    self.m2a = pow(self.ses2,self.private_key.d,self.private_key.n)
                     #m2a reveals sb
                     #sb = m2a["key"]
                     #Calculates (m2b, sig2) by countermode-decrypting m2c using sb, tod as key and nonce
@@ -345,7 +347,7 @@ class Client(object):
                     #Verify h = sha3_256(m2a)
                     #h == sha3_256(m2a)
                 def generate_agreed_diffie_key(self):
-                    self.D_ab = pow(self.d_a,int(self.json_response["agreement_data"]["diffie_pub_k"]),p)
+                    self.D_ab = pow(self.d_a,int(self.json_response["payload"]["agreement_data"]["diffie_pub_k"]),p)
 
 
 
