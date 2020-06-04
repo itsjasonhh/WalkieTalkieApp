@@ -50,6 +50,12 @@ class ClientThread(threading.Thread):
 
                 # 3. Send Response
                 self.clientd.send(bytes(self.response, 'UTF-8'))
+
+                # 4. generate agreed key
+                self.generate_agreed_diffie_key()
+
+                # 5. generate k1 and k2
+                self.generate_k1_k2()
             else:
                 self.clientd.close()
                 break
@@ -94,6 +100,19 @@ class ClientThread(threading.Thread):
 
         # self.pprint.received('\nRequest >>>\n----------\n{0}\n----------'.format(request))
         return True
+
+    def generate_agreed_diffie_key(self):
+        """
+        Function used to generate the agreed upon diffie key
+        """
+        self.D_ab = pow(int(self.json_request["agreement_data"]["diffie_pub_k"]), self.d_b, p)
+
+    def generate_k1_k2(self):
+        """
+        Function used to create k1 and k2 keys
+        """
+        self.k1 = 0
+        self.k2 = 0
 
     def build_response(self):
         """
