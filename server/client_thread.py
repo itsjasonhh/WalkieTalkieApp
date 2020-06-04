@@ -8,6 +8,7 @@ import sys
 import os
 import math
 import hashlib
+import copy
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
@@ -105,14 +106,39 @@ class ClientThread(threading.Thread):
         """
         Function used to generate the agreed upon diffie key
         """
-        self.D_ab = pow(int(self.json_request["agreement_data"]["diffie_pub_k"]), self.d_b, p)
+        self.D_ab = pow(int(self.json_request["payload"]["agreement_data"]["diffie_pub_k"]), self.d_b, p)
 
     def generate_k1_k2(self):
         """
         Function used to create k1 and k2 keys
         """
-        self.k1 = 0
-        self.k2 = 0
+        # D_ab int to bytes
+        D_ab = copy.copy(self.D_ab)
+
+        data_int_in_binary = bin(D_ab)[2:]
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
+        concat_bytes = '{0}{1}'.format('00000001', data_int_in_binary)
+        length = int(len(concat_bytes) / 8)
+        concat_int = int(concat_bytes, 2)
+        concat_bytes = concat_int.to_bytes(length, byteorder='little')
+
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.k1 = int(m.hexdigest(), 16)
+
+        concat_bytes = '{0}{1}'.format('00000010', data_int_in_binary)
+        length = int(len(concat_bytes) / 8)
+        concat_int = int(concat_bytes, 2)
+        concat_bytes = concat_int.to_bytes(length, byteorder='little')
+
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.k2 = int(m.hexdigest(), 16)
 
     def build_response(self):
         """
@@ -181,10 +207,9 @@ class ClientThread(threading.Thread):
         """
         Function used to generate the our public diffie hellman key based on g and p values
         """
-        # TODO: need to generate correct size Diffie Hellman priv key
         self.d_b = int.from_bytes(get_random_bytes(512), byteorder='little')
 
-        diffie_pub_key = pow(g, self.private_key.d, p)
+        diffie_pub_key = pow(g, self.d_b, p)
         diffie_pub_key_str = str(diffie_pub_key)
 
         self.json_response.dhke_data["payload"]["agreement_data"]["diffie_pub_k"] = diffie_pub_key_str

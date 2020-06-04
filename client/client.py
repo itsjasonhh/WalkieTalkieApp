@@ -15,8 +15,6 @@ from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
 from encryptlib.SimonCTR import countermode_encrypt, countermode_decrypt
 from keylib.keys import g, p
-from diffie_ephemeral_to_k1_k2 import get_k1_and_k2
-from file_header import create_header
 
 BUFFER_SIZE = 32768
 KEY_BIT_SIZE = 4000
@@ -66,6 +64,45 @@ class Client(object):
         }
 
         self.json_request.dhke_data["sess_key"] = sess_key
+
+    def get_m2a(self):
+        self.m2a = pow(int(self.json_response["sess_key"]["key"]), self.private_key.d, self.private_key.n)
+
+    def generate_agreed_diffie_key(self):
+        self.D_ab = pow(int(self.json_response["payload"]["agreement_data"]["diffie_pub_k"]), self.d_a, p)
+
+    def generate_k1_k2(self):
+        """
+        Function used to create k1 and k2 keys
+        """
+        # D_ab int to bytes
+        D_ab = copy.copy(self.D_ab)
+
+        data_int_in_binary = bin(D_ab)[2:]
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
+        concat_bytes = '{0}{1}'.format('00000001', data_int_in_binary)
+        length = int(len(concat_bytes) / 8)
+        concat_int = int(concat_bytes, 2)
+        concat_bytes = concat_int.to_bytes(length, byteorder='little')
+
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.k1 = int(m.hexdigest(), 16)
+
+        concat_bytes = '{0}{1}'.format('00000010', data_int_in_binary)
+        length = int(len(concat_bytes) / 8)
+        concat_int = int(concat_bytes, 2)
+        concat_bytes = concat_int.to_bytes(length, byteorder='little')
+
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.k2 = int(m.hexdigest(), 16)
+
 
     def encrypt_sess_key(self):
         """
@@ -327,6 +364,9 @@ class Client(object):
             if self.is_valid_response(msg):
                 # self.process_response()
                 self.process_response()
+                self.get_m2a()
+                self.generate_agreed_diffie_key()
+                self.generate_k1_k2()
                 print('YAY, Recieved message 2 from Bob.\nNeed to process\nExiting...')
 
                 # 1. Need to process message 2
@@ -335,8 +375,6 @@ class Client(object):
                     #Receives (m2c, ses2)
                     #Calculates m2a by decrypting ses2 using Alice's RSA private key
                     #m2a = pow(ses2,self.private_key.d,self.private_key.n)
-                def get_m2a(self):
-                    self.m2a = pow(self.ses2,self.private_key.d,self.private_key.n)
                     #m2a reveals sb
                     #sb = m2a["key"]
                     #Calculates (m2b, sig2) by countermode-decrypting m2c using sb, tod as key and nonce
@@ -346,9 +384,6 @@ class Client(object):
                     #m2b reveals hash session key h and diffie-hellman public key D_b
                     #Verify h = sha3_256(m2a)
                     #h == sha3_256(m2a)
-                def generate_agreed_diffie_key(self):
-                    self.D_ab = pow(self.d_a,int(self.json_response["payload"]["agreement_data"]["diffie_pub_k"]),p)
-
 
 
                 # 3. If valid response we need to send audio
