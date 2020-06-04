@@ -349,15 +349,15 @@ class Client(object):
                     #temp2 = '02' + hex(pow(D_b,d_a,p))[2:]
                     #k1 = sha3_256(temp)
                     #k2 = sha3_256(temp2)
-                    
+
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
                     # with open("../recording.encrypted", 'rb') as file:
                     #     data = file.read()
                     #     message = data.hex()
                     #     D = countermode_encrypt(bin(message)[2:],self.sess_key["ToD"],k1)
-                    #Calculate tag = sha3_512(k2 || D)
-                          #tag = create_header(data,self.sess_key["ToD"],diffie?)
+                    #Calculate tag = sha3_256(k2 || D)
+                          #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
 
