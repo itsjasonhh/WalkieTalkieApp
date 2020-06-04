@@ -273,7 +273,6 @@ class Client(object):
             return False
 
 
-
     def verify_sign(self):
         """
         Function to verify signature of packet 1 from talker
@@ -382,6 +381,16 @@ class Client(object):
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
+                T = hashlib.sha3_256(bytes(str(self.k2) + self.D)).digest()
+                import base64
+                value = base64.b64encode(T)
+                tag_value = {"tag": value.decode()}
+                tag_value_str = json.dumps(tag_value)
+                length = len(tag_value_str)
+                length_str = '{:08d}'.format(length)
+                self.m3 = '{0}{1}{2}'.format('3', length_str, tag_value_str)
+
+
             else:
                 # else close connection
                 self.clientsocket.close()
