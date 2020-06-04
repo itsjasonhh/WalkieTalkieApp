@@ -385,7 +385,7 @@ class Client(object):
         m.update(concat_bytes)
         self.tag = int(m.hexdigest(), 16)
 
-    def build_audio_message():
+    def build_audio_message(self):
         """
         Function to build messsage with encrypted audio
         """
@@ -424,13 +424,8 @@ class Client(object):
 
                 self.build_audio_message()
 
-                self.clientsocket.sendall(bytes(self.audio_message, 'UTF-8'))
                 # 3. If valid response we need to send audio
-                    #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
-                    #Calculate tag = sha3_256(k2 || D)
-                          #tag = sha3_256(k2 + D)
-                    #Create m3 = {"tag":tag}
-                    #Send (m3, D)
+                self.clientsocket.sendall(bytes(self.audio_message, 'UTF-8'))
             else:
                 # else close connection
                 self.clientsocket.close()
