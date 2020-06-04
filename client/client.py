@@ -385,9 +385,9 @@ class Client(object):
         m.update(concat_bytes)
         self.tag = int(m.hexdigest(), 16)
 
-    def build_audio_message(self):
+    def build_fileheader_message(self):
         """
-        Function to build messsage with encrypted audio
+        Function to build messsage with tag of encrypted message
         """
         json_message = {
             "tag": self.D
@@ -397,8 +397,18 @@ class Client(object):
         length = len(json.dumps(json_message))
         length_str = '{:08d}'.format(length)
 
-        # form entire audio message
-        self.audio_message = '{0}{1}{2}'.format('3', length_str, json.dumps(json_message))
+        # form entire fileheader message
+        self.fileheader_message = '{0}{1}{2}'.format('3', length_str, json.dumps(json_message))
+
+    def build_audio_message(self):
+        """
+        Function to build packet D with encrypted audio
+        """
+        length = len(self.D)
+        length_str = '{:08d}'.format(length)
+
+        # for entire D packet with encrypted audio
+        self.audio_message = '{0}{1}{2}'.format('D', length_str, self.D)
 
     def run(self):
         """
@@ -422,10 +432,12 @@ class Client(object):
                 """
                 self.encrypt_audio()
 
+                self.build_fileheader_message()
                 self.build_audio_message()
 
-                # 3. If valid response we need to send audio
-                self.clientsocket.sendall(bytes(self.audio_message, 'UTF-8'))
+                # send file header and data
+                header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
+                self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
             else:
                 # else close connection
                 self.clientsocket.close()
