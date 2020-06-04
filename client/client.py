@@ -369,29 +369,13 @@ class Client(object):
                 self.generate_k1_k2()
                 print('YAY, Recieved message 2 from Bob.\nNeed to process\nExiting...')
 
-                # 1. Need to process message 2
-
-                # 2. get key info
-                    #Receives (m2c, ses2)
-                    #Calculates m2a by decrypting ses2 using Alice's RSA private key
-                    #m2a = pow(ses2,self.private_key.d,self.private_key.n)
-                    #m2a reveals sb
-                    #sb = m2a["key"]
-                    #Calculates (m2b, sig2) by countermode-decrypting m2c using sb, tod as key and nonce
-                    #m2b, sig2 = countermode_decrypt(m2c,self.sess_key["ToD"],sb)
-                    #Verify e_kb(sig2) = sha3_256(m2b)
-                    #pow(sig2,bob's_public_key,self.private_key.n) == sha3_256(m2b)
-                    #m2b reveals hash session key h and diffie-hellman public key D_b
-                    #Verify h = sha3_256(m2a)
-                    #h == sha3_256(m2a)
-
-
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
-                    # with open("../recording.encrypted", 'rb') as file:
-                    #     data = file.read()
-                    #     message = data.hex()
-                    #     D = countermode_encrypt(bin(message)[2:],self.sess_key["ToD"],k1)
+                def encrypt_audio(self):
+                    with open("../recording.m4a", 'rb') as file:
+                        data = file.read()
+                        message = data.hex()
+                        self.D = countermode_encrypt(bin(message)[2:],self.t,self.k1)
                     #Calculate tag = sha3_256(k2 || D)
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
