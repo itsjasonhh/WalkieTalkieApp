@@ -344,11 +344,23 @@ class Client(object):
                     #m2b reveals hash session key h and diffie-hellman public key D_b
                     #Verify h = sha3_256(m2a)
                     #h == sha3_256(m2a)
-                    #Calculate k1 and k2: k1||k2 = sha3_256(pow(D_b,d_a,p))
-                    #temp1 = '01' + hex(pow(D_b,d_a,p)[2:]
-                    #temp2 = '02' + hex(pow(D_b,d_a,p))[2:]
-                    #k1 = sha3_256(temp)
-                    #k2 = sha3_256(temp2)
+                def generate_agreed_diffie_key(self):
+                    self.D_ab = pow(self.d_a,int(self.json_response["agreement_data"]["diffie_pub_k"]),p)
+                
+                def generate_k1_and_k2(self):
+                    temp1 = '01' + hex(self.D_ab)[2:]
+                    m = hashlib.sha3_256()
+                    m.update(bytes(temp1, 'utf-8'))
+                    byte_value = m.digest()
+                    k1 = str(int.from_bytes(byte_value, byteorder='little'))
+                    temp2 = '01' + hex(self.D_ab)[2:]
+                    m2 = hashlib.sha3_256()
+                    m2.update(bytes(temp2, 'utf-8'))
+                    byte_value_2 = m2.digest()
+                    k2 = str(int.from_bytes(byte_value_2, byteorder='little'))
+                    self.k1 = k1
+                    self.k2 = k2
+
 
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
