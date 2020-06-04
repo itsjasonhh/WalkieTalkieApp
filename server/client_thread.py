@@ -140,6 +140,8 @@ class ClientThread(threading.Thread):
         m.update(concat_bytes)
         self.k2 = int(m.hexdigest(), 16)
 
+        self.t = int(self.json_request["sess_key"]["ToD"])
+
     def build_response(self):
         """
         Function to handle sending a response to the client

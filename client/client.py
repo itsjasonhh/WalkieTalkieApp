@@ -65,9 +65,6 @@ class Client(object):
 
         self.json_request.dhke_data["sess_key"] = sess_key
 
-    def get_m2a(self):
-        self.m2a = pow(int(self.json_response["sess_key"]["key"]), self.private_key.d, self.private_key.n)
-
     def generate_agreed_diffie_key(self):
         self.D_ab = pow(int(self.json_response["payload"]["agreement_data"]["diffie_pub_k"]), self.d_a, p)
 
@@ -103,6 +100,7 @@ class Client(object):
         m.update(concat_bytes)
         self.k2 = int(m.hexdigest(), 16)
 
+        self.t = self.sess_key["ToD"]
 
     def encrypt_sess_key(self):
         """
@@ -364,10 +362,11 @@ class Client(object):
             if self.is_valid_response(msg):
                 # self.process_response()
                 self.process_response()
-                self.get_m2a()
                 self.generate_agreed_diffie_key()
                 self.generate_k1_k2()
                 print('YAY, Recieved message 2 from Bob.\nNeed to process\nExiting...')
+                print()
+                exit(0)
 
                 # 1. Need to process message 2
 
