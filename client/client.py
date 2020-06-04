@@ -346,8 +346,6 @@ class Client(object):
         sess_str = sess_str.decode('utf-8')
 
         self.json_response["sess_key"] = json.loads(sess_str)
-        
-
 
     def run(self):
         """
@@ -365,13 +363,12 @@ class Client(object):
                 self.process_response()
                 self.generate_agreed_diffie_key()
                 self.generate_k1_k2()
-                print('YAY, Recieved message 2 from Bob.\nNeed to process\nExiting...')
-                print()
-                exit(0)
 
+                """
+                    Alice calculates message 3 and D
+                """
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
-                
                     #Calculate tag = sha3_256(k2 || D)
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
