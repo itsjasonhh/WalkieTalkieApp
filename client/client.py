@@ -346,20 +346,7 @@ class Client(object):
                     #h == sha3_256(m2a)
                 def generate_agreed_diffie_key(self):
                     self.D_ab = pow(self.d_a,int(self.json_response["agreement_data"]["diffie_pub_k"]),p)
-                
-                def generate_k1_and_k2(self):
-                    temp1 = '01' + hex(self.D_ab)[2:]
-                    m = hashlib.sha3_256()
-                    m.update(bytes(temp1, 'utf-8'))
-                    byte_value = m.digest()
-                    k1 = str(int.from_bytes(byte_value, byteorder='little'))
-                    temp2 = '01' + hex(self.D_ab)[2:]
-                    m2 = hashlib.sha3_256()
-                    m2.update(bytes(temp2, 'utf-8'))
-                    byte_value_2 = m2.digest()
-                    k2 = str(int.from_bytes(byte_value_2, byteorder='little'))
-                    self.k1 = k1
-                    self.k2 = k2
+
 
 
                 # 3. If valid response we need to send audio
