@@ -354,6 +354,51 @@ class Client(object):
             self.D = int(self.D, 2)
             self.D = str(self.D)
 
+    def create_tag(self):
+        """
+        Function used to create tag for message with encrypted audio
+        """
+        D_bin = bin(int(self.D))[2:]
+        k2_bin = bin(int(self.k2))[2:]
+
+        remainder = len(D_bin) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            D_bin = '{0}{1}'.format(pad, D_bin)
+
+        remainder = len(k2_bin) % 8
+
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            k2_bin = '{0}{1}'.format(pad, k2_bin)
+
+        length = int(len(concat_bytes / 8))
+
+        # Need to concatenate k2 in front of D and then convert to bytes
+        concat_bits = '{0}{1}'.format(k2_bin, D_bin)
+        concat_bytes = concat_bits.to_bytes(length, byteorder='little')
+
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.tag = int(m.hexdigest(), 16)
+
+    def build_audio_message(self):
+        """
+        Function to build messsage with encrypted audio
+        """
+        json_message = {
+            "tag": self.D
+        }
+
+        # Determine length of JSON object payload with tag
+        length = len(json.dumps(json_message))
+        length_str = '{:08d}'.format(length)
+
+        # form entire audio message
+        self.audio_message = '{0}{1}{2}'.format('3', length_str, json.dumps(json_message))
+
     def run(self):
         """
         Function used to run client connection to server
@@ -375,6 +420,9 @@ class Client(object):
                     Alice calculates message 3 and D
                 """
                 self.encrypt_audio()
+
+                self.build_audio_message()
+
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
                     #Calculate tag = sha3_256(k2 || D)
@@ -390,6 +438,8 @@ class Client(object):
                 length_str = '{:08d}'.format(length)
                 self.m3 = '{0}{1}{2}'.format('3', length_str, tag_value_str)
 
+
+                self.clientsocket.sendall(bytes(self.audio_message, 'UTF-8'))
 
             else:
                 # else close connection
