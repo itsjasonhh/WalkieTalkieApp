@@ -324,7 +324,6 @@ class Client(object):
         length = int(math.ceil(m2_c_dec.bit_length() / 8))
 
         payload_str = m2_c_dec.to_bytes(length, byteorder='little')
-        # TODO: Something's this fails, idk why
         payload_str = payload_str.decode('utf-8')
 
         self.json_response["payload"] = json.loads(payload_str)

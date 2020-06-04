@@ -68,12 +68,38 @@ class ClientThread(threading.Thread):
 
             self.read_audio_message()
 
-            if self.is_valid_file_header(data):
-                print('Valid File Header')
-            else:
-                self.clientd.close()
-                break
+            self.decrypt_audio()
+
+            self.clientd.close()
             break
+
+    def decrypt_audio(self):
+        """
+        Function to decrypt audio
+        """
+        D_int = int(self.encrypted_audio)
+        data_int_in_binary = bin(D_int)[2:]
+
+        """
+            Checking to see if binary data is divisible by 8
+        """
+        remainder = len(data_int_in_binary) % 8
+
+        if remainder != 0:
+            pad = '0' * (8 - remainder)
+            data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
+
+        decrypt_val = countermode_decrypt(data_int_in_binary, self.t, self.k1)
+        decrypt_int = int(decrypt_val, 2)
+
+        length = int(math.ceil(decrypt_int.bit_length() / 8))
+
+        decrypt_bytes = decrypt_int.to_bytes(length, byteorder='little')
+
+        f = open('audio.m4a', 'wb')
+
+        f.write(decrypt_bytes)
+        f.close()
 
     def read_audio_message(self):
         """
