@@ -16,6 +16,7 @@ from encryptlib.print_helper import PrintHelper
 from encryptlib.SimonCTR import countermode_encrypt, countermode_decrypt
 from keylib.keys import g, p
 from diffie_ephemeral_to_k1_k2 import get_k1_and_k2
+from file_header import create_header
 
 BUFFER_SIZE = 32768
 KEY_BIT_SIZE = 4000
@@ -338,16 +339,25 @@ class Client(object):
                     #sb = m2a["key"]
                     #Calculates (m2b, sig2) by countermode-decrypting m2c using sb, tod as key and nonce
                     #m2b, sig2 = countermode_decrypt(m2c,self.sess_key["ToD"],sb)
-                    #Verify e_kb(sig2) = sha3_512(m2b)
-                    #pow(sig2,bob's_public_key,self.private_key.n) == sha3_512(m2b)
+                    #Verify e_kb(sig2) = sha3_256(m2b)
+                    #pow(sig2,bob's_public_key,self.private_key.n) == sha3_256(m2b)
                     #m2b reveals hash session key h and diffie-hellman public key D_b
-                    #Verify h = sha3_512(m2a)
-                    #h == sha3_512(m2a)
-                    #Calculate k1 and k2: k1||k2 = sha3_512(D_b ^ d_a mod p)
-                    #k1,k2 = get_k1_and_k2(self.private_key.d, D_b)
+                    #Verify h = sha3_256(m2a)
+                    #h == sha3_256(m2a)
+                    #Calculate k1 and k2: k1||k2 = sha3_256(pow(D_b,d_a,p))
+                    #temp1 = '01' + hex(pow(D_b,d_a,p)[2:]
+                    #temp2 = '02' + hex(pow(D_b,d_a,p))[2:]
+                    #k1 = sha3_256(temp)
+                    #k2 = sha3_256(temp2)
+                    
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
+                    # with open("../recording.encrypted", 'rb') as file:
+                    #     data = file.read()
+                    #     message = data.hex()
+                    #     D = countermode_encrypt(bin(message)[2:],self.sess_key["ToD"],k1)
                     #Calculate tag = sha3_512(k2 || D)
+                          #tag = create_header(data,self.sess_key["ToD"],diffie?)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
 
