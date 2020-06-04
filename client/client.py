@@ -373,6 +373,11 @@ class Client(object):
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
+            def encrypt_audio(self):
+                with open("../recording.m4a", 'rb') as file:
+                    data = file.read()
+                    message = data.hex()
+                    self.D = countermode_encrypt(bin(message)[2:],self.t,self.k1)
 
             else:
                 # else close connection
