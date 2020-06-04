@@ -273,7 +273,6 @@ class Client(object):
             return False
 
 
-
     def verify_sign(self):
         """
         Function to verify signature of packet 1 from talker
@@ -387,7 +386,11 @@ class Client(object):
 
     def build_fileheader_message(self):
         """
+<<<<<<< HEAD
         Function to build messsage with tag of encrypted message
+=======
+        Function to build message with encrypted audio
+>>>>>>> be038da5dc5b9d6b97520ab22023a3fa7cb804ce
         """
         json_message = {
             "tag": self.D
@@ -438,6 +441,24 @@ class Client(object):
                 # send file header and data
                 header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
                 self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
+
+                # 3. If valid response we need to send audio
+                    #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
+                    #Calculate tag = sha3_256(k2 || D)
+                          #tag = sha3_256(k2 + D)
+                    #Create m3 = {"tag":tag}
+                    #Send (m3, D)
+                """
+                T = hashlib.sha3_256(bytes(str(self.k2) + self.D)).digest()
+                import base64
+                value = base64.b64encode(T)
+                tag_value = {"tag": value.decode()}
+                tag_value_str = json.dumps(tag_value)
+                length = len(tag_value_str)
+                length_str = '{:08d}'.format(length)
+                self.m3 = '{0}{1}{2}'.format('3', length_str, tag_value_str)
+                """
+
             else:
                 # else close connection
                 self.clientsocket.close()

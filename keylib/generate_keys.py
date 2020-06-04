@@ -1,4 +1,4 @@
-from keys import e, KEY_BIT_SIZE
+from keylib.keys import e, KEY_BIT_SIZE
 from Crypto.PublicKey import RSA
 import os
 
