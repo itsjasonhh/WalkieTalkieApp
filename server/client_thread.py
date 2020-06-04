@@ -62,10 +62,9 @@ class ClientThread(threading.Thread):
                 break
 
             """
-                Need to wait for File Header and Data now
+                Need to wait for encrypted audio now
             """
-            data = self.clientd.recv(BUFFER_SIZE)
-            msg = data.decode()
+            self.read_audio_message()
 
             if self.is_valid_file_header(data):
                 print('Valid File Header')
@@ -73,6 +72,30 @@ class ClientThread(threading.Thread):
                 self.clientd.close()
                 break
             break
+
+    def read_audio_message(self):
+        """
+        Function used to keep reading from socket in order to read the entire
+        encrypted audio message
+        """
+        curr_payload_read = 0
+        data = self.clientd.recv(BUFFER_SIZE)
+        msg = data.decode()
+        data_type = msg[0]
+        data_length = int(msg[1:9])
+        curr_payload_read = len(msg[9:])
+
+        while curr_payload_read < data_length:
+            data = self.clientd.recv(BUFFER_SIZE)
+            curr_msg = data.decode()
+            curr_length = len(curr_msg)
+
+            msg = '{0}{1}'.format(msg, curr_msg)
+
+            curr_payload_read += curr_length
+
+        print('Read Encrypted Audio Packet')
+
 
     def is_valid_request(self, request):
         """
