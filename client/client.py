@@ -354,6 +354,21 @@ class Client(object):
             self.D = countermode_encrypt(bin(int(message, 16))[2:],self.t,self.k1)
             self.D = int(self.D, 2)
             self.D = str(self.D)
+    
+    def create_tag(self):
+        D_hex = hex(int(self.D))[2:]
+        ########Need to concatenate k2 in front of D and then convert to bytes
+
+
+        concat_bytes = 
+        ###############
+        m = hashlib.sha3_256()
+        m.update(concat_bytes)
+        self.tag = int(m.hexdigest(),16)
+
+
+
+
 
     def run(self):
         """
