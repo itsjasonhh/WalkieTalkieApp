@@ -77,25 +77,9 @@ class ClientThread(threading.Thread):
 
     def read_audio_message(self):
         """
-        Function used to read audio message with encrypted recording
+        Function to read the D packet with encrypted audio
         """
-        curr_payload_read = 0
-        data = self.clientd.recv(BUFFER_SIZE)
-        msg = data.decode()
-        data_type = msg[0]
-        data_length = int(msg[1:9])
-        curr_payload_read = len(msg[9:])
-
-        while curr_payload_read < data_length:
-            data = self.clientd.recv(BUFFER_SIZE)
-            curr_msg = data.decode()
-            curr_length = len(curr_msg)
-
-            msg = '{0}{1}'.format(msg, curr_msg)
-
-            curr_payload_read += curr_length
-
-        self.encrypted_audio = msg[9:]
+        pass
 
     def read_fileheader_message(self):
         """
@@ -103,20 +87,29 @@ class ClientThread(threading.Thread):
         encrypted audio message
         """
         curr_payload_read = 0
-        data = self.clientd.recv(BUFFER_SIZE)
+        read_amount = BUFFER_SIZE
+        data = self.clientd.recv(read_amount)
         msg = data.decode()
         data_type = msg[0]
         data_length = int(msg[1:9])
         curr_payload_read = len(msg[9:])
 
+        tag_left = data_length - curr_payload_read
+
         while curr_payload_read < data_length:
-            data = self.clientd.recv(BUFFER_SIZE)
+            if tag_left < BUFFER_SIZE:
+                read_amount = tag_left
+            else:
+                read_amount = BUFFER_SIZE
+
+            data = self.clientd.recv(read_amount)
             curr_msg = data.decode()
             curr_length = len(curr_msg)
 
             msg = '{0}{1}'.format(msg, curr_msg)
 
             curr_payload_read += curr_length
+            tag_left = data_length - curr_payload_read
 
         json_message = json.loads(msg[9:])
         self.fileheader_message = json_message
