@@ -346,6 +346,7 @@ class Client(object):
         sess_str = sess_str.decode('utf-8')
 
         self.json_response["sess_key"] = json.loads(sess_str)
+        
 
 
     def run(self):
@@ -370,11 +371,7 @@ class Client(object):
 
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
-                def encrypt_audio(self):
-                    with open("../recording.m4a", 'rb') as file:
-                        data = file.read()
-                        message = data.hex()
-                        self.D = countermode_encrypt(bin(message)[2:],self.t,self.k1)
+                
                     #Calculate tag = sha3_256(k2 || D)
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
