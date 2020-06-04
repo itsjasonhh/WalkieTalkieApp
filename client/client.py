@@ -347,6 +347,14 @@ class Client(object):
 
         self.json_response["sess_key"] = json.loads(sess_str)
 
+    def encrypt_audio(self):
+        with open("encryptlib/recording.m4a", 'rb') as file:
+            data = file.read()
+            message = data.hex()
+            self.D = countermode_encrypt(bin(int(message, 16))[2:],self.t,self.k1)
+            self.D = int(self.D, 2)
+            self.D = str(self.D)
+
     def run(self):
         """
         Function used to run client connection to server
@@ -367,21 +375,17 @@ class Client(object):
                 """
                     Alice calculates message 3 and D
                 """
+                self.encrypt_audio()
                 # 3. If valid response we need to send audio
                     #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
                     #Calculate tag = sha3_256(k2 || D)
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
-            def encrypt_audio(self):
-                with open("../recording.m4a", 'rb') as file:
-                    data = file.read()
-                    message = data.hex()
-                    self.D = countermode_encrypt(bin(message)[2:],self.t,self.k1)
-
             else:
                 # else close connection
                 self.clientsocket.close()
 
+            print('We encrypted!')
             break
 
