@@ -386,7 +386,7 @@ class Client(object):
 
     def build_audio_message(self):
         """
-        Function to build messsage with encrypted audio
+        Function to build message with encrypted audio
         """
         json_message = {
             "tag": self.D
@@ -429,6 +429,7 @@ class Client(object):
                           #tag = sha3_256(k2 + D)
                     #Create m3 = {"tag":tag}
                     #Send (m3, D)
+                """
                 T = hashlib.sha3_256(bytes(str(self.k2) + self.D)).digest()
                 import base64
                 value = base64.b64encode(T)
@@ -437,7 +438,7 @@ class Client(object):
                 length = len(tag_value_str)
                 length_str = '{:08d}'.format(length)
                 self.m3 = '{0}{1}{2}'.format('3', length_str, tag_value_str)
-
+                """
 
                 self.clientsocket.sendall(bytes(self.audio_message, 'UTF-8'))
 
