@@ -398,7 +398,7 @@ class Client(object):
         length_str = '{:08d}'.format(length)
 
         # form entire audio message
-        self.audio_message = '{0}{1}{2}'.format('3', length_str, self.json_request.__str__())
+        self.audio_message = '{0}{1}{2}'.format('3', length_str, json.dumps(json_message))
 
     def run(self):
         """
