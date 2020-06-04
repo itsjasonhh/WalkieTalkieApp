@@ -386,11 +386,7 @@ class Client(object):
 
     def build_fileheader_message(self):
         """
-<<<<<<< HEAD
         Function to build messsage with tag of encrypted message
-=======
-        Function to build message with encrypted audio
->>>>>>> be038da5dc5b9d6b97520ab22023a3fa7cb804ce
         """
         json_message = {
             "tag": self.D
