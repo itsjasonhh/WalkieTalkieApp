@@ -7,7 +7,6 @@ from Crypto.PublicKey import RSA
 from server.server import Server
 from client.client import Client
 
-SERVER = '127.0.0.1'
 PUB_KEY_PATH = 'keylib/pubkey.pem'
 PRI_KEY_PATH = 'keylib/key.pem'
 
@@ -16,6 +15,9 @@ def handle_arguments():
     Function used to set and handle arguments
     """
     parser = argparse.ArgumentParser(description='Server Accepting and Sending Encrypt/Decrypt Request')
+
+    parser.add_argument('IP', help='IP Address to use for client to connect to, or server to listen on')
+
     parser.add_argument('PORT', type=int,
                         help='Port for server to listen on')
 
@@ -24,6 +26,8 @@ def handle_arguments():
 
     parser.add_argument('-l', '--listener', action='store_true', default=False, dest='listener',
                         help='Flag used to specify the server is will send request to encrpyt data')
+
+    parser.add_argument('-k', '--keyfile', dest='keyfile', help='location of the private keyfile')
 
     return parser.parse_args()
 
@@ -47,20 +51,21 @@ def main():
     """
         Need to load RSA private and public keys
     """
-    f = open(PRI_KEY_PATH, 'r')
+    keyfile_path = PRI_KEY_PATH
+
+    if (args.keyfile):
+        keyfile_path = args.keyfile
+
+    f = open(keyfile_path, 'r')
     key = RSA.import_key(f.read())
+    pubkey = key.publickey()
     f.close()
-
-    f = open(PUB_KEY_PATH, 'r')
-    pubkey = RSA.import_key(f.read())
-    f.close()
-
 
     if args.listener:
         """
             We are the server and we are open to accepting requests
         """
-        server = Server('', args.PORT, pubkey, key)
+        server = Server(args.IP, args.PORT, pubkey, key)
         server.init()
         server.run()
 
@@ -68,7 +73,7 @@ def main():
         """
             We are a client and we want to send a request
         """
-        client = Client(SERVER, args.PORT, pubkey, key)
+        client = Client(args.IP, args.PORT, pubkey, key)
         client.init()
         client.run()
 
