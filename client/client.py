@@ -352,7 +352,6 @@ class Client(object):
 
             message = data.hex()
             message_bits = bin(int('1' + message, 16))[3:]
-            print(len(message_bits) // 8)
 
             self.D = countermode_encrypt(message_bits, self.t, self.k1)
 
