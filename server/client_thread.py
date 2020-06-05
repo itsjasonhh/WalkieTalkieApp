@@ -87,13 +87,13 @@ class ClientThread(threading.Thread):
         Function to sample audio after it has been decrypted
         """
         say_string = 'Audio content has been decrypted to file {0}.'.format(self.audio_file)
-        command = 'say \'{0}\''.format(say_string)
+        command = 'say -v Victoria \'{0}\''.format(say_string)
         check_call(command, shell=True)
 
-        cont = input('Would you like to hear a sample? [y/n]')
+        cont = input('Would you like to hear a sample? [y/n]: ')
 
         if ('y' in cont) or ('Y' in cont):
-            check_call('say \'Here is a sample\'', shell=True)
+            check_call('say -v Victoria \'Here is a sample\'', shell=True)
 
             command = 'afplay {0}'.format(self.audio_file)
             check_call(command, shell=True)

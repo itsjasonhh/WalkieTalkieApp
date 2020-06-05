@@ -4,6 +4,8 @@
 """
 import socket
 import logging
+import sys
+from subprocess import check_call
 from server.client_thread import ClientThread
 
 MAX_CONNECTIONS = 5
@@ -38,9 +40,15 @@ class Server(object):
         """
         Function used to run the tcp server and accept connections
         """
-        while True:
-            logging.info('Waiting for connection...')
-            (clientsocket, address) = self.serversocket.accept()
+        try:
+            while True:
+                logging.info('Waiting for connection...')
+                (clientsocket, address) = self.serversocket.accept()
 
-            ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
-            ct.run()
+                ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
+                ct.run()
+        except KeyboardInterrupt:
+            command = 'say -v Victoria \'good bye\''
+            logging.info('Exiting Gracefully...')
+            check_call(command, shell=True)
+            sys.exit()

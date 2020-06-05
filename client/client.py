@@ -419,7 +419,7 @@ class Client(object):
         Function to sample audio to encrypt
         """
         say_string = 'You Chose file {0} to encrypt.\nHere is a sample'.format(self.audio_file)
-        command = 'say \'{0}\''.format(say_string)
+        command = 'say -v Alex \'{0}\''.format(say_string)
         check_call(command, shell=True)
 
         command = 'afplay {0}'.format(self.audio_file)
