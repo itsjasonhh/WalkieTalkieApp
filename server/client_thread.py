@@ -82,18 +82,10 @@ class ClientThread(threading.Thread):
         """
             Checking to see if binary data is divisible by 8
         """
-        # remainder = len(data_int_in_binary) % 8
-
-        # if remainder != 0:
-        #     pad = '0' * (8 - remainder)
-        #     data_int_in_binary = '{0}{1}'.format(pad, data_int_in_binary)
-
         decrypt_val = countermode_decrypt(data_int_in_binary, self.t, self.k1)
-        decrypt_int = int(decrypt_val, 2)
-
-        length = int(math.ceil(decrypt_int.bit_length() / 8))
-
-        decrypt_bytes = decrypt_int.to_bytes(length, byteorder='little')
+        decrypt_val = '1' + decrypt_val
+        decrypt_hex = hex(int(decrypt_val, 2))[3:]
+        decrypt_bytes = bytes.fromhex(decrypt_hex)
 
         f = open('audio.m4a', 'wb')
 
@@ -137,7 +129,7 @@ class ClientThread(threading.Thread):
         encrypted audio message
         """
         curr_payload_read = 0
-        read_amount = BUFFER_SIZE
+        read_amount = 64
         data = self.clientd.recv(read_amount)
         msg = data.decode()
         data_type = msg[0]
@@ -147,10 +139,10 @@ class ClientThread(threading.Thread):
         tag_left = data_length - curr_payload_read
 
         while curr_payload_read < data_length:
-            if tag_left < BUFFER_SIZE:
+            if tag_left < 64:
                 read_amount = tag_left
             else:
-                read_amount = BUFFER_SIZE
+                read_amount = 64
 
             data = self.clientd.recv(read_amount)
             curr_msg = data.decode()

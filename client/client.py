@@ -349,8 +349,12 @@ class Client(object):
     def encrypt_audio(self):
         with open("encryptlib/recording.m4a", 'rb') as file:
             data = file.read()
+
             message = data.hex()
-            self.D = countermode_encrypt(bin(int(message, 16))[2:],self.t,self.k1)
+            message_bits = bin(int('1' + message, 16))[3:]
+            print(len(message_bits) // 8)
+
+            self.D = countermode_encrypt(message_bits, self.t, self.k1)
 
     def create_tag(self):
         """
@@ -440,8 +444,6 @@ class Client(object):
                 # send file header and data
                 header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
                 self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
-
-                print('We Encrypted')
 
             self.clientsocket.close()
             break
