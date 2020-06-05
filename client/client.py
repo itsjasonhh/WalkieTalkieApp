@@ -207,6 +207,10 @@ class Client(object):
         """
         Function used to validate response
         """
+        # check if response is invalid
+        if len(response) < 9:
+            return False
+
         resp_type = response[0]
         resp_length = response[1:9]
 
@@ -438,12 +442,8 @@ class Client(object):
                 # send file header and data
                 header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
                 self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
+                print('We Encrypted')
 
-            else:
-                # else close connection
-                self.clientsocket.close()
-
-            print('We encrypted!')
             self.clientsocket.close()
             break
 
