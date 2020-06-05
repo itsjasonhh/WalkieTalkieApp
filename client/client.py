@@ -372,15 +372,14 @@ class Client(object):
             pad = '0' * (8 - remainder)
             k2_bin = '{0}{1}'.format(pad, k2_bin)
 
-        length = int(len(concat_bytes / 8))
-
         # Need to concatenate k2 in front of D and then convert to bytes
         concat_bits = '{0}{1}'.format(k2_bin, D_bin)
-        concat_bytes = concat_bits.to_bytes(length, byteorder='little')
+        concat_int = int(concat_bits, 2)
+        concat_bytes = bytes(concat_bits, 'UTF-8')
 
         m = hashlib.sha3_256()
         m.update(concat_bytes)
-        self.tag = int(m.hexdigest(), 16)
+        self.tag = str(int(m.hexdigest(), 16))
 
     def build_fileheader_message(self):
         """
@@ -441,6 +440,7 @@ class Client(object):
                 # send file header and data
                 header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
                 self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
+
                 print('We Encrypted')
 
             self.clientsocket.close()
