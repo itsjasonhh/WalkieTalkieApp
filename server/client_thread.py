@@ -10,6 +10,7 @@ import math
 import hashlib
 import copy
 import logging
+from subprocess import check_call
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
@@ -18,6 +19,7 @@ from keylib.keys import g, p
 
 BUFFER_SIZE = 32768
 HEADER_SIZE = 9
+OUTFILE = 'audio.m4a'
 
 class ClientThread(threading.Thread):
     def __init__(self,clientsocket, client_address, public_key, private_key):
@@ -28,6 +30,7 @@ class ClientThread(threading.Thread):
         self.clientd = clientsocket
         self.public_key = public_key
         self.private_key = private_key
+        self.audio_file = OUTFILE
         self.pprint = PrintHelper()
 
 
@@ -73,9 +76,24 @@ class ClientThread(threading.Thread):
             self.read_audio_message()
 
             self.decrypt_audio()
-            logging.info("Audio decrypted and written as 'audio.m4a'")
+            logging.info("Audio decrypted and written as '{0}'".format(OUTFILE))
+            self.sample_audio()
             self.clientd.close()
             break
+
+    def sample_audio(self):
+        """
+        Function to sample audio after it has been decrypted
+        """
+        say_string = 'Audio content has been decrypted to file {0}.'.format(self.audio_file)
+        command = 'say \'{0}\''.format(say_string)
+        check_call(command, shell=True)
+
+        check_call('say \'Here is a sample\'', shell=True)
+
+        command = 'afplay {0}'.format(self.audio_file)
+        check_call(command, shell=True)
+
 
     def decrypt_audio(self):
         """

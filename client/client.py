@@ -9,6 +9,7 @@ import copy
 import hashlib
 import math
 import logging
+from subprocess import check_call
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
@@ -21,7 +22,7 @@ BUFFER_SIZE = 32768
 KEY_BIT_SIZE = 4000
 
 class Client(object):
-    def __init__(self, server, port, public_key, private_key):
+    def __init__(self, server, port, public_key, private_key, audio_file):
         """
         Default constructor for the client implementation
         """
@@ -31,6 +32,7 @@ class Client(object):
         self.request = None
         self.public_key = public_key
         self.private_key = private_key
+        self.audio_file = audio_file
         self.pprint = PrintHelper()
 
     def init(self):
@@ -350,7 +352,7 @@ class Client(object):
         self.json_response["sess_key"] = json.loads(sess_str)
 
     def encrypt_audio(self):
-        with open("encryptlib/recording.m4a", 'rb') as file:
+        with open(self.audio_file, 'rb') as file:
             data = file.read()
 
             message = data.hex()
@@ -412,10 +414,30 @@ class Client(object):
         # for entire D packet with encrypted audio
         self.audio_message = '{0}{1}{2}'.format('D', length_str, self.D)
 
+    def sample_audio(self):
+        """
+        Function to sample audio to encrypt
+        """
+        say_string = 'You Chose file {0} to encrypt.\nHere is a sample'.format(self.audio_file)
+        command = 'say \'{0}\''.format(say_string)
+        check_call(command, shell=True)
+
+        command = 'afplay {0}'.format(self.audio_file)
+        check_call(command, shell=True)
+
     def run(self):
         """
         Function used to run client connection to server
         """
+        self.sample_audio()
+
+        cont = input('Would you like to continue with encryption of {0}? [y/n]: '.format(self.audio_file))
+
+        if ('y' not in cont) or ('Y' in cont):
+            logging.info('Exiting...')
+            self.clientsocket.close()
+            return
+
         self.build_request()
         self.clientsocket.sendall(bytes(self.request, 'UTF-8'))
 

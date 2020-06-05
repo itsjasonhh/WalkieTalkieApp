@@ -34,6 +34,8 @@ def handle_arguments():
 
     parser.add_argument('-p', '--pubfile', dest='pubfile', help='location of the public keyfile of Bob')
 
+    parser.add_argument('-f', '--file', dest='audiofile', help='location of audio file to encrypt')
+
     parser.add_argument('--verbose', '-v', dest='verbose', action='count')
 
     return parser.parse_args()
@@ -100,7 +102,7 @@ def main():
         """
             We are a client and we want to send a request
         """
-        client = Client(args.IP, args.PORT, pubkey, key)
+        client = Client(args.IP, args.PORT, pubkey, key, args.audiofile)
         client.init()
         client.run()
 
