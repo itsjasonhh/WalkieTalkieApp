@@ -153,7 +153,7 @@ class Client(object):
         hash_bytes = m.digest()
         hash_int = int.from_bytes(hash_bytes, byteorder='little')
 
-        signature = str(pow(hash_int, self.private_key.d, self.public_key.n))
+        signature = str(pow(hash_int, self.private_key.d, self.private_key.n))
         self.json_request.dhke_data["payload"]["signature"] = signature
 
     def encrypt_agreement_data(self):

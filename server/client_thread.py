@@ -285,7 +285,7 @@ class ClientThread(threading.Thread):
         hash_bytes = m.digest()
         hash_int = int.from_bytes(hash_bytes, byteorder='little')
 
-        signature = str(pow(hash_int, self.private_key.d, self.public_key.n))
+        signature = str(pow(hash_int, self.private_key.d, self.private_key.n))
         self.json_response.dhke_data["payload"]["signature"] = signature
 
     def generate_diffie_pub_key(self):
