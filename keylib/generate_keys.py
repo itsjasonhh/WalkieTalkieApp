@@ -1,10 +1,9 @@
-from keylib.keys import e, KEY_BIT_SIZE
+from keys import e, KEY_BIT_SIZE
 from Crypto.PublicKey import RSA
 import os
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-PRIVATE_KEY_FILE = os.path.join(CWD, 'key.pem')
-PUBLIC_KEY_FILE = os.path.join(CWD, 'pubkey.pem')
+PRIVATE_KEY_FILE = os.path.join(CWD, 'testkey.pem')
 
 def main():
     """
@@ -19,10 +18,6 @@ def main():
     # Export Keys
     f = open(PRIVATE_KEY_FILE, 'wb')
     f.write(key.export_key('PEM'))
-    f.close()
-
-    f = open(PUBLIC_KEY_FILE, 'wb')
-    f.write(pub_key.export_key('PEM'))
     f.close()
 
 if __name__ == '__main__':
