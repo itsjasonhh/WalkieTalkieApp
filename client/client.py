@@ -351,14 +351,12 @@ class Client(object):
             data = file.read()
             message = data.hex()
             self.D = countermode_encrypt(bin(int(message, 16))[2:],self.t,self.k1)
-            self.D = int(self.D, 2)
-            self.D = str(self.D)
 
     def create_tag(self):
         """
         Function used to create tag for message with encrypted audio
         """
-        D_bin = bin(int(self.D))[2:]
+        D_bin = self.D
         k2_bin = bin(int(self.k2))[2:]
 
         remainder = len(D_bin) % 8
