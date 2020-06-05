@@ -420,9 +420,14 @@ class Client(object):
             msg = in_data.decode()
 
             if self.is_valid_response(msg):
-                # self.process_response()
-                self.process_response()
+                is_valid = self.process_response()
+
+                if not is_valid:
+                    self.clientsocket.close()
+                    break
+
                 self.generate_agreed_diffie_key()
+
                 self.generate_k1_k2()
 
                 """
@@ -437,27 +442,11 @@ class Client(object):
                 header_and_data = '{0}{1}'.format(self.fileheader_message,  self.audio_message)
                 self.clientsocket.sendall(bytes(header_and_data, 'UTF-8'))
 
-                # 3. If valid response we need to send audio
-                    #Create D = Encrypted audio using simon ctr with k1, ToD as key/nonce
-                    #Calculate tag = sha3_256(k2 || D)
-                          #tag = sha3_256(k2 + D)
-                    #Create m3 = {"tag":tag}
-                    #Send (m3, D)
-                """
-                T = hashlib.sha3_256(bytes(str(self.k2) + self.D)).digest()
-                import base64
-                value = base64.b64encode(T)
-                tag_value = {"tag": value.decode()}
-                tag_value_str = json.dumps(tag_value)
-                length = len(tag_value_str)
-                length_str = '{:08d}'.format(length)
-                self.m3 = '{0}{1}{2}'.format('3', length_str, tag_value_str)
-                """
-
             else:
                 # else close connection
                 self.clientsocket.close()
 
             print('We encrypted!')
+            self.clientsocket.close()
             break
 
