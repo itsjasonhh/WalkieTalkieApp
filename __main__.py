@@ -3,7 +3,7 @@
     Script to handle server / client socket implementation for CSE 234 Project
 """
 import argparse
-import logging
+import logging, coloredlogs
 import sys
 from subprocess import check_call
 from Crypto.PublicKey import RSA
@@ -50,9 +50,9 @@ def handle_logger():
         print('Error deleting old log file')
         exit(1)
 
+    coloredlogs.install(level='DEBUG', fmt='%(asctime)s [%(process)d] %(levelname)s %(message)s')
     logging.basicConfig(stream=sys.stdout,
-            format='%(asctime)s:%(levelname)s:%(message)s',
-            level=logging.INFO)
+            level=logging.DEBUG)
 
 def main():
     """
