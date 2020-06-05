@@ -3,12 +3,15 @@
     Script to handle server / client socket implementation for CSE 234 Project
 """
 import argparse
+import logging
+import sys
+from subprocess import check_call
 from Crypto.PublicKey import RSA
 from server.server import Server
 from client.client import Client
 
-PUB_KEY_PATH = 'keylib/pubkey.pem'
 PRI_KEY_PATH = 'keylib/key.pem'
+LOG_FILE = 'logging.log'
 
 def handle_arguments():
     """
@@ -29,9 +32,26 @@ def handle_arguments():
 
     parser.add_argument('-k', '--keyfile', dest='keyfile', help='location of the private keyfile')
 
+    parser.add_argument('-p', '--pubfile', dest='pubfile', help='location of the public keyfile of Bob')
+
     parser.add_argument('--verbose', '-v', dest='verbose', action='count')
 
     return parser.parse_args()
+
+def handle_logger():
+    """
+    Function used to set up logging file
+    """
+    command = 'rm -f {0}'.format(LOG_FILE)
+
+    try:
+        check_call(command, shell=True)
+    except subprocess.CalledProcessError as e:
+        print('Error deleting old log file')
+        exit(1)
+
+    logging.basicConfig(filename=LOG_FILE, format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
+    logging.StreamHandler(sys.stdout)
 
 def main():
     """
@@ -39,6 +59,7 @@ def main():
     """
     args  = handle_arguments()
 
+    handle_logger()
 
     if (args.listener and args.talker):
         print('You can either be a listener or talker, not both!')
@@ -60,8 +81,11 @@ def main():
 
     f = open(keyfile_path, 'r')
     key = RSA.import_key(f.read())
-    pubkey = key.publickey()
     f.close()
+
+    f = open(args.pubfile, 'r')
+    tempkey = RSA.import_key(f.read())
+    pubkey = tempkey.publickey()
 
     if args.listener:
         """
