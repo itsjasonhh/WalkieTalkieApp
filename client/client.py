@@ -431,7 +431,12 @@ class Client(object):
         """
         self.sample_audio()
 
+        say_string = 'Would you like to continue with encryption of file {0} '.format(self.audio_file)
+        command = 'say -v Victoria \'{0}\''.format(say_string)
+        check_call(command, shell=True)
         cont = input('Would you like to continue with encryption of {0}? [y/n]: '.format(self.audio_file))
+
+        check_call('say -v Victoria \'Okay\'', shell=True)
 
         if ('y' not in cont) or ('Y' in cont):
             logging.info('Exiting...')

@@ -43,6 +43,8 @@ class Server(object):
         try:
             while True:
                 logging.info('Waiting for connection...')
+                command = 'say -v Alex \'Waiting for connection\''
+                check_call(command, shell=True)
                 (clientsocket, address) = self.serversocket.accept()
 
                 ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
