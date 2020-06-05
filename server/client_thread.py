@@ -37,7 +37,7 @@ class ClientThread(threading.Thread):
         """
         while True:
             data = self.clientd.recv(BUFFER_SIZE)
-            logging.info('Reveived Request')
+            logging.info('Received Request')
             bytes_recv = len(data)
             msg = data.decode()
 
@@ -56,9 +56,11 @@ class ClientThread(threading.Thread):
 
                 # 4. generate agreed key
                 self.generate_agreed_diffie_key()
+                logging.info("Generated agreed DH key.")
 
                 # 5. generate k1 and k2
                 self.generate_k1_k2()
+                logging.info("Generated k_1 and k_2")
             else:
                 self.clientd.close()
                 break
@@ -71,7 +73,7 @@ class ClientThread(threading.Thread):
             self.read_audio_message()
 
             self.decrypt_audio()
-
+            logging.info("Audio decrypted and written as 'audio.m4a'")
             self.clientd.close()
             break
 
@@ -236,11 +238,11 @@ class ClientThread(threading.Thread):
         self.hash_sess_key()
         self.encrypt_sess_key()
         self.generate_diffie_pub_key()
-
+        logging.info("Generated DH public key.")
         self.sign_agreement_data()
-
+        
         self.encrypt_agreement_data()
-
+        logging.info("Signed and encrypted agreement data.")
         # Determine length of JSON payload
         length = len(self.json_response.__str__())
         length_str = '{:08d}'.format(length)
@@ -337,7 +339,7 @@ class ClientThread(threading.Thread):
         self.decrypt_sess_key()
         self.decrypt_payload()
         is_valid_sign = self.verify_sign()
-
+        
         if is_valid_sign:
             # continue processing
             is_valid_hash = self.verify_hash()

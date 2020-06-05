@@ -191,11 +191,11 @@ class Client(object):
         self.hash_sess_key()
         self.encrypt_sess_key()
         self.generate_diffie_pub_key()
-
+        logging.info("Generated DH public key.")
         self.sign_agreement_data()
-
         self.encrypt_agreement_data()
-
+        logging.info("Signed and encrypted agreement data.")
+    
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
         length_str = '{:08d}'.format(length)
@@ -243,7 +243,9 @@ class Client(object):
             Begin Processing response JSON object
         """
         self.decrypt_sess_key()
+    
         self.decrypt_payload()
+        logging.info("Decrypted session key and payload.")
 
         is_valid_sign = self.verify_sign()
 
@@ -252,10 +254,10 @@ class Client(object):
             return False
 
         is_valid_hash = self.verify_hash()
-
+        
         if not is_valid_sign:
             return False
-
+        logging.info("Hash and signature verified.")
         return True
 
     def verify_hash(self):
@@ -423,21 +425,22 @@ class Client(object):
 
             if self.is_valid_response(msg):
                 is_valid = self.process_response()
-
+                logging.info("Response valid!")
                 if not is_valid:
                     self.clientsocket.close()
                     break
 
                 self.generate_agreed_diffie_key()
-
+                logging.info("Generated agreed DH key.")
                 self.generate_k1_k2()
-
+                logging.info("k_1 and k_2 generated")
                 """
                     Alice calculates message 3 and D
                 """
                 self.encrypt_audio()
-
+                logging.info("Audio encrypted.")
                 self.create_tag()
+                logging.info("Tag created.")
                 self.build_fileheader_message()
                 self.build_audio_message()
 
