@@ -239,22 +239,19 @@ class Client(object):
         """
         self.decrypt_sess_key()
         self.decrypt_payload()
+
         is_valid_sign = self.verify_sign()
 
-        if is_valid_sign:
-            # continue processing
-            is_valid_hash = self.verify_hash()
 
-            if is_valid_sign:
-                # Now need to start building response
-                # hence return and call self.build_response()
-                return
-            else:
-                #close connection
-                pass
-        else:
-            # need to close connection
-            pass
+        if not is_valid_sign:
+            return False
+
+        is_valid_hash = self.verify_hash()
+
+        if not is_valid_sign:
+            return False
+
+        return True
 
     def verify_hash(self):
         """
