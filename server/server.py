@@ -48,7 +48,7 @@ class Server(object):
                 ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
                 ct.run()
         except KeyboardInterrupt:
-            command = 'say -v Victoria \'good bye\''
+            command = 'say -v Alex \'good bye\''
             logging.info('Exiting Gracefully...')
             check_call(command, shell=True)
             sys.exit()
