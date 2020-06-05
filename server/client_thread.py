@@ -41,12 +41,12 @@ class ClientThread(threading.Thread):
             bytes_recv = len(data)
             msg = data.decode()
 
-            """
-                Close connection.
-            """
             if self.is_valid_request(msg):
                 # 1. Process Response
-                self.process_request()
+                is_valid = self.process_request()
+
+                if not is_valid:
+                    self.clientd.close()
 
                 # 2. Build Response
                 self.build_response()
@@ -165,6 +165,9 @@ class ClientThread(threading.Thread):
         """
         Function to validate request
         """
+        if len(request) < 9:
+            return False
+
         req_type = request[0]
         req_length = request[1:9]
 
@@ -340,20 +343,15 @@ class ClientThread(threading.Thread):
         self.decrypt_payload()
         is_valid_sign = self.verify_sign()
 
-        if is_valid_sign:
-            # continue processing
-            is_valid_hash = self.verify_hash()
+        if not is_valid_sign:
+            return False
 
-            if is_valid_sign:
-                # Now need to start building response
-                # hence return and call self.build_response()
-                return
-            else:
-                #close connection
-                pass
-        else:
-            # need to close connection
-            pass
+        is_valid_hash = self.verify_hash()
+
+        if not is_valid_hash:
+            return False
+
+        return True
 
     def create_sess_key(self):
         """

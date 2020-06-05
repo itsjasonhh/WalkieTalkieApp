@@ -3,6 +3,7 @@
     Script to handle server socket implementation for CSE 234 Project. (Listener)
 """
 import socket
+import logging
 from server.client_thread import ClientThread
 
 MAX_CONNECTIONS = 5
@@ -38,6 +39,7 @@ class Server(object):
         Function used to run the tcp server and accept connections
         """
         while True:
+            logging.info('Waiting for connection...')
             (clientsocket, address) = self.serversocket.accept()
 
             ct = ClientThread(clientsocket, address, self.public_key, self.private_key)
