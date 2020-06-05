@@ -389,7 +389,7 @@ class Client(object):
         Function to build messsage with tag of encrypted message
         """
         json_message = {
-            "tag": self.D
+            "tag": self.tag
         }
 
         # Determine length of JSON object payload with tag
@@ -436,6 +436,7 @@ class Client(object):
                 """
                 self.encrypt_audio()
 
+                self.create_tag()
                 self.build_fileheader_message()
                 self.build_audio_message()
 
