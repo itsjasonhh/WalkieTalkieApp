@@ -195,7 +195,7 @@ class Client(object):
         self.sign_agreement_data()
         self.encrypt_agreement_data()
         logging.info("Signed and encrypted agreement data.")
-    
+
         # Determine length of JSON payload
         length = len(self.json_request.__str__())
         length_str = '{:08d}'.format(length)
@@ -243,7 +243,7 @@ class Client(object):
             Begin Processing response JSON object
         """
         self.decrypt_sess_key()
-    
+
         self.decrypt_payload()
         logging.info("Decrypted session key and payload.")
 
@@ -254,7 +254,7 @@ class Client(object):
             return False
 
         is_valid_hash = self.verify_hash()
-        
+
         if not is_valid_sign:
             return False
         logging.info("Hash and signature verified.")

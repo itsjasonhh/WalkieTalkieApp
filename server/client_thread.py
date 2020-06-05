@@ -240,7 +240,7 @@ class ClientThread(threading.Thread):
         self.generate_diffie_pub_key()
         logging.info("Generated DH public key.")
         self.sign_agreement_data()
-        
+
         self.encrypt_agreement_data()
         logging.info("Signed and encrypted agreement data.")
         # Determine length of JSON payload
@@ -339,7 +339,7 @@ class ClientThread(threading.Thread):
         self.decrypt_sess_key()
         self.decrypt_payload()
         is_valid_sign = self.verify_sign()
-        
+
         if is_valid_sign:
             # continue processing
             is_valid_hash = self.verify_hash()
