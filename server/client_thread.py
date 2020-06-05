@@ -79,6 +79,7 @@ class ClientThread(threading.Thread):
             logging.info("Audio decrypted and written as '{0}'".format(OUTFILE))
             self.sample_audio()
             self.clientd.close()
+            logging.info('Closing client connection...')
             break
 
     def sample_audio(self):
@@ -89,10 +90,13 @@ class ClientThread(threading.Thread):
         command = 'say \'{0}\''.format(say_string)
         check_call(command, shell=True)
 
-        check_call('say \'Here is a sample\'', shell=True)
+        cont = input('Would you like to hear a sample? [y/n]')
 
-        command = 'afplay {0}'.format(self.audio_file)
-        check_call(command, shell=True)
+        if ('y' in cont) or ('Y' in cont):
+            check_call('say \'Here is a sample\'', shell=True)
+
+            command = 'afplay {0}'.format(self.audio_file)
+            check_call(command, shell=True)
 
 
     def decrypt_audio(self):
