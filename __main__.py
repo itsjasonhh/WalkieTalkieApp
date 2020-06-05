@@ -29,6 +29,8 @@ def handle_arguments():
 
     parser.add_argument('-k', '--keyfile', dest='keyfile', help='location of the private keyfile')
 
+    parser.add_argument('--verbose', '-v', dest='verbose', action='count')
+
     return parser.parse_args()
 
 def main():
