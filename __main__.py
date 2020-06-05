@@ -50,8 +50,9 @@ def handle_logger():
         print('Error deleting old log file')
         exit(1)
 
-    logging.basicConfig(filename=LOG_FILE, format='%(asctime)s:%(levelname)s:%(message)s', level=logging.INFO)
-    logging.StreamHandler(sys.stdout)
+    logging.basicConfig(stream=sys.stdout,
+            format='%(asctime)s:%(levelname)s:%(message)s',
+            level=logging.INFO)
 
 def main():
     """
