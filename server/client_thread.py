@@ -9,6 +9,7 @@ import os
 import math
 import hashlib
 import copy
+import logging
 from Crypto.Random import get_random_bytes
 from encryptlib.json_message import JsonMessage
 from encryptlib.print_helper import PrintHelper
@@ -36,6 +37,7 @@ class ClientThread(threading.Thread):
         """
         while True:
             data = self.clientd.recv(BUFFER_SIZE)
+            logging.info('Reveived Request')
             bytes_recv = len(data)
             msg = data.decode()
 
